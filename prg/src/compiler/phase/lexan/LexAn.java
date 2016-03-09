@@ -60,6 +60,7 @@ public class LexAn extends Phase {
 	 */
 	public Symbol lexAn() {
 		// TODO
+		return null;
 	}
 
 	/**
