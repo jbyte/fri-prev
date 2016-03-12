@@ -16,6 +16,16 @@ public class LexAn extends Phase {
 	/** The source file. */
 	private FileReader srcFile;
 
+	/** The source file name. */
+	private String srcName;
+
+	/** Current position in the file. */
+	private int line = 0;
+	private int col = 0;
+
+	/** Temporary character */
+	private char tempc = '\0';
+
 	/**
 	 * Constructs a new lexical analyzer.
 	 * 
@@ -30,6 +40,7 @@ public class LexAn extends Phase {
 
 		// Open the source file.
 		try {
+			srcName = this.task.srcFName;
 			srcFile = new FileReader(this.task.srcFName);
 		} catch (FileNotFoundException ex) {
 			throw new CompilerError("Source file '" + this.task.srcFName + "' not found.");
@@ -58,9 +69,135 @@ public class LexAn extends Phase {
 	 * 
 	 * @return The next lexical symbol.
 	 */
-	public Symbol lexAn() {
-		// TODO
-		return null;
+	public Symbol lexAn() throws IOException {
+		//int tline = 0, tcol = 0;
+		//while(tline<line){
+			//if(srcFile.read()=='\n')tline++;
+		//}
+		//while(tcol<col){
+			//srcFile.read();
+			//tcol++;
+		//}
+
+		char c = '\0';
+		if(tempc=='\0' || tempc=='\r' || tempc=='\n' || tempc=='\t' || tempc==' ' || tempc==((char)10)){
+			tempc = '\0';
+			while(srcFile.ready()){
+				c = (char)srcFile.read();
+				if(c==' '){
+					col++;
+					continue;
+				}else if(c=='\t'){
+					col+=4;
+					continue;
+				}else if(c=='\n'){
+					line++;
+					col=0;
+					continue;
+				}else if(c=='\r'){
+					continue;
+				}else if(c==((char)10)){
+					line++;
+					col=0;
+					continue;
+				}else break;
+			}
+		}else c = tempc;
+
+		if(((int)c)==-1)return log(new Symbol(Symbol.Token.EOF,new Position(srcName,line,col)));
+		col++;
+
+		switch(c){
+			case '+':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.ADD,new Position(srcName,line,col)));
+			case '&':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.AND,new Position(srcName,line,col)));
+			case '=':
+				if((c=(char)srcFile.read())=='=')
+					return log(new Symbol(Symbol.Token.EQU,new Position(srcName,line,col)));
+				else{
+					tempc = c;
+					return log(new Symbol(Symbol.Token.ASSIGN,new Position(srcName,line,col)));
+				}
+			case ':':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.COLON,new Position(srcName,line,col)));
+			case ',':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.COMMA,new Position(srcName,line,col)));
+			case '}':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.CLOSING_BRACE,new Position(srcName,line,col)));
+			case ']':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.CLOSING_BRACKET,new Position(srcName,line,col)));
+			case ')':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.CLOSING_PARENTHESIS,new Position(srcName,line,col)));
+			case '.':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.DOT,new Position(srcName,line,col)));
+			case '/':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.DIV,new Position(srcName,line,col)));
+			case '>':
+				if((c=(char)srcFile.read())=='=')
+					return log(new Symbol(Symbol.Token.GEQ,new Position(srcName,line,col)));
+				else{
+					tempc = c;
+					return log(new Symbol(Symbol.Token.GTH,new Position(srcName,line,col)));
+				}
+			case '<':	
+				if((c=(char)srcFile.read())=='=')
+					return log(new Symbol(Symbol.Token.LEQ,new Position(srcName,line,col)));
+				else{
+					tempc = c;
+					return log(new Symbol(Symbol.Token.LTH,new Position(srcName,line,col)));
+				}
+			case '@':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.MEM,new Position(srcName,line,col)));
+			case '%':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.MOD,new Position(srcName,line,col)));
+			case '*':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.MUL,new Position(srcName,line,col)));
+			case '!':
+				if((c=(char)srcFile.read())=='=')
+					return log(new Symbol(Symbol.Token.NEQ,new Position(srcName,line,col)));
+				else{
+					tempc = c;
+					return log(new Symbol(Symbol.Token.NOT,new Position(srcName,line,col)));
+				}
+			case '{':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.OPENING_BRACE,new Position(srcName,line,col)));
+			case '[':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.OPENING_BRACKET,new Position(srcName,line,col)));
+			case '(':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.OPENING_PARENTHESIS,new Position(srcName,line,col)));
+			case '|':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.OR,new Position(srcName,line,col)));
+			case '-':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.SUB,new Position(srcName,line,col)));
+			case '^':
+				tempc = '\0';
+				return log(new Symbol(Symbol.Token.VAL,new Position(srcName,line,col)));
+			//case '"': break;
+			//case ''': break;
+		}
+
+		if(c=='i' || c=='3' || c=='1')
+			return log(new Symbol(Symbol.Token.INTEGER,new Position(srcName,line,col)));
+		else return log(new Symbol(Symbol.Token.BOOLEAN,new Position(srcName,line,col)));
+		//throw new CompilerError("symbol/identifier/number not implemented yet: "+(int)c+":"+line+","+col);
 	}
 
 	/**

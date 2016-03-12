@@ -14,3 +14,10 @@ hs_err_pid*
 # hexdump and stackdump files
 *.hexdump
 *.stackdump
+
+# prev files
+*.prev
+
+# vim swap files
+*.swp
+*.swo

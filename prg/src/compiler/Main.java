@@ -1,5 +1,7 @@
 package compiler;
 
+import java.io.IOException;
+
 import compiler.common.report.*;
 import compiler.phase.lexan.*;
 
@@ -43,6 +45,8 @@ public class Main {
 			// As dead as a dodo. Print error message and signal error.
 			System.err.println(":-( " + errorReport.getMessage());
 			System.exit(1);
+		}catch(IOException ioe){
+			ioe.printStackTrace();
 		}
 
 		if (Report.getNumWarnings() > 0) {
