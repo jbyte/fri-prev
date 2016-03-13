@@ -195,17 +195,47 @@ public class LexAn extends Phase {
 				tempc = '\0';
 				return log(new Symbol(Symbol.Token.VAL,new Position(srcName,line,col)));
 			//case '"': break;
-			//case ''': break;
+			case '\'':
+				int tmp = srcFile.read();
+				col++;
+				if(tmp>=32 && tmp<=126){
+					if((char)tmp=='\\'){
+						tmp = srcFile.read();
+						col++;
+						if((char)tmp=='\\' && (char)srcFile.read()=='\''){
+							return log(new Symbol(Symbol.Token.CONST_CHAR,"\'\\\\\'",
+								new Position(srcName,line,col-2,srcName,line,col+1)));
+						}else if((char)tmp=='\'' && (char)srcFile.read()=='\''){
+							return log(new Symbol(Symbol.Token.CONST_CHAR,"\'\\\'\'",
+								new Position(srcName,line,col-2,srcName,line,col+1)));
+						}else if((char)tmp=='\"' && (char)srcFile.read()=='\''){
+							return log(new Symbol(Symbol.Token.CONST_CHAR,"\'\\\"\'",
+								new Position(srcName,line,col-2,srcName,line,col+1)));
+						}else if((char)tmp=='t' && (char)srcFile.read()=='\''){
+							return log(new Symbol(Symbol.Token.CONST_CHAR,"\'\\t\'",
+								new Position(srcName,line,col-2,srcName,line,col+1)));
+						}else if((char)tmp=='n' && (char)srcFile.read()=='\''){
+							return log(new Symbol(Symbol.Token.CONST_CHAR,"\'\\n\'",
+								new Position(srcName,line,col-2,srcName,line,col+1)));
+						}else throw new CompilerError("Invalid escape sequence.");
+					}else if((char)tmp=='\'' || (char)tmp=='\"'){
+						throw new CompilerError("Invalid character name: "+tmp+"("+(char)tmp+").");
+					}else{
+						if((char)srcFile.read()!='\'')
+							throw new CompilerError("Character constaints consis of only"+
+								" one character name in single quotes.");
+						col++;
+						return log(new Symbol(Symbol.Token.CONST_CHAR,"\'"+(char)tmp+"\'",
+							new Position(srcName,line,col-2,srcName,line,col)));
+					}
+				}else throw new CompilerError("Invalid character name: "+tmp+"("+(char)tmp+").");
 		}
 
-		System.out.println("found symbol, which is not a symbol or white space: "+(int)c+":"+line+","+col);
 		if(c=='i' || c=='3' || c=='1' || c=='(' || c==')'){
-			System.out.println("expected");
 			return log(new Symbol(Symbol.Token.INTEGER,new Position(srcName,line,col)));
 		}else if(((int)c)==10){
 			return lexAn();
 		}else{
-			System.out.println("unexpected");
 			return log(new Symbol(Symbol.Token.BOOLEAN,new Position(srcName,line,col)));
 		}
 		//throw new CompilerError("symbol/identifier/number not implemented yet: "+(int)c+":"+line+","+col);
