@@ -15,8 +15,8 @@ hs_err_pid*
 *.hexdump
 *.stackdump
 
-# prev files
-*.prev
+# xml files
+*.xml
 
 # vim swap files
 *.swp

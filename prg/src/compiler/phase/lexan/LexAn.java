@@ -20,7 +20,7 @@ public class LexAn extends Phase {
 	private String srcName;
 
 	/** Current position in the file. */
-	private int line = 0;
+	private int line = 1;
 	private int col = 0;
 
 	/** Temporary character */
@@ -80,7 +80,7 @@ public class LexAn extends Phase {
 		//}
 
 		char c = '\0';
-		if(tempc=='\0' || tempc=='\r' || tempc=='\n' || tempc=='\t' || tempc==' ' || tempc==((char)10)){
+		if(tempc=='\0' || tempc=='\r' || tempc=='\n' || tempc=='\t' || tempc==' ' || ((int)tempc)==10){
 			tempc = '\0';
 			while(srcFile.ready()){
 				c = (char)srcFile.read();
@@ -96,15 +96,19 @@ public class LexAn extends Phase {
 					continue;
 				}else if(c=='\r'){
 					continue;
-				}else if(c==((char)10)){
+				}else if(((int)c)==10){
 					line++;
 					col=0;
 					continue;
 				}else break;
 			}
-		}else c = tempc;
+		}else{
+			c = tempc;
+			tempc = '\0';
+		}
 
-		if(((int)c)==-1)return log(new Symbol(Symbol.Token.EOF,new Position(srcName,line,col)));
+		if(((int)c)==-1 || ((int)c)==0)
+			return log(new Symbol(Symbol.Token.EOF,new Position(srcName,line,col)));
 		col++;
 
 		switch(c){
@@ -194,9 +198,16 @@ public class LexAn extends Phase {
 			//case ''': break;
 		}
 
-		if(c=='i' || c=='3' || c=='1')
+		System.out.println("found symbol, which is not a symbol or white space: "+(int)c+":"+line+","+col);
+		if(c=='i' || c=='3' || c=='1' || c=='(' || c==')'){
+			System.out.println("expected");
 			return log(new Symbol(Symbol.Token.INTEGER,new Position(srcName,line,col)));
-		else return log(new Symbol(Symbol.Token.BOOLEAN,new Position(srcName,line,col)));
+		}else if(((int)c)==10){
+			return lexAn();
+		}else{
+			System.out.println("unexpected");
+			return log(new Symbol(Symbol.Token.BOOLEAN,new Position(srcName,line,col)));
+		}
 		//throw new CompilerError("symbol/identifier/number not implemented yet: "+(int)c+":"+line+","+col);
 	}
 
