@@ -266,10 +266,27 @@ public class LexAn extends Phase {
 				val = 10*val + Character.digit(c,10);
 				c = (char)srcFile.read();
 				i++;
+				col++;
 			}while(Character.isDigit(c));
 			tempc = c;
-			col+=i;
 			return log(new Symbol(Symbol.Token.CONST_INTEGER,""+val,new Position(srcName,line,col-i,srcName,line,col)));
+		}else if(Character.isLetter(c) || c=='_'){
+			if(c=='_') throw new CompilerError("Not implemented yet._");
+			else{
+				String id = ""+c;
+				int i = 0;
+				c = (char)srcFile.read();
+				while(Character.isLetter(c) || c=='_'){
+					id+=c;
+					i++;
+					col++;
+					c = (char)srcFile.read();
+				}
+				tempc = c;
+				if(id.equals("true") || id.equals("false"))
+					return log(new Symbol(Symbol.Token.CONST_BOOLEAN,id,new Position(srcName,line,col-i,srcName,line,col)));
+				else throw new CompilerError("Not implemented yet.");
+			}
 		}else if(((int)c)==10){
 			return lexAn();
 		}else{
