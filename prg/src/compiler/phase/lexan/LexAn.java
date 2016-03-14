@@ -204,7 +204,25 @@ public class LexAn extends Phase {
 			case '^':
 				tempc = '\0';
 				return log(new Symbol(Symbol.Token.VAL,new Position(srcName,line,col)));
-			//case '"': break;
+			case '"':
+				String str = "";
+				int i = 1;
+				while((c=(char)srcFile.read())!='\"'){
+					col++;
+					i++;
+					if((int)c>=32 && (int)c<=126){
+						if(c=='\n' || c=='#') throw new CompilerError("Unexpected end of string.");
+						else if(c=='\\'){
+							c = (char)srcFile.read();
+							col++;
+							i++;
+							if(c!='\\' && c!='\'' && c!='\"' && c!='t' && c!='n')
+								throw new CompilerError("Invalid escape sequence: "+line+","+col);
+							else str+="\\"+c;
+						}else str+=c;
+					}else throw new CompilerError("Invalid character name: "+(int)c+"("+c+").");
+				}
+				return log(new Symbol(Symbol.Token.CONST_STRING,"\""+str+"\"",new Position(srcName,line,col-i,srcName,line,col)));
 			case '\'':
 				int tmp = srcFile.read();
 				col++;

@@ -1,0 +1,4 @@
+"some text"
+
+"\"some text with \'legit\' \t escape sequences \"\n"
+"some text with digits 123"
