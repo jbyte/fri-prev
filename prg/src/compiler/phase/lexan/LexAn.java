@@ -289,6 +289,16 @@ public class LexAn extends Phase {
 					return log(new Symbol(Symbol.Token.CONST_NULL,new Position(srcName,line,col-i,srcName,line,col)));
 				else if(id.equals("none"))
 					return log(new Symbol(Symbol.Token.CONST_NONE,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("integer"))
+					return log(new Symbol(Symbol.Token.INTEGER,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("boolean"))
+					return log(new Symbol(Symbol.Token.BOOLEAN,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("char"))
+					return log(new Symbol(Symbol.Token.CHAR,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("string"))
+					return log(new Symbol(Symbol.Token.STRING,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("void"))
+					return log(new Symbol(Symbol.Token.VOID,new Position(srcName,line,col-i,srcName,line,col)));
 				else throw new CompilerError("Not implemented yet.");
 			}
 		}else if(((int)c)==10){
