@@ -241,8 +241,17 @@ public class LexAn extends Phase {
 				}else throw new CompilerError("Invalid character name: "+tmp+"("+(char)tmp+").");
 		}
 
-		if(c=='i' || c=='3' || c=='1' || c=='(' || c==')'){
-			return log(new Symbol(Symbol.Token.INTEGER,new Position(srcName,line,col)));
+		if(Character.isDigit(c)){
+			int val = 0;
+			int i = 0;
+			do{
+				val = 10*val + Character.digit(c,10);
+				c = (char)srcFile.read();
+				i++;
+			}while(Character.isDigit(c));
+			tempc = c;
+			col+=i;
+			return log(new Symbol(Symbol.Token.CONST_INTEGER,""+val,new Position(srcName,line,col-i,srcName,line,col)));
 		}else if(((int)c)==10){
 			return lexAn();
 		}else{
