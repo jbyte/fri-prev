@@ -299,6 +299,32 @@ public class LexAn extends Phase {
 					return log(new Symbol(Symbol.Token.STRING,new Position(srcName,line,col-i,srcName,line,col)));
 				else if(id.equals("void"))
 					return log(new Symbol(Symbol.Token.VOID,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("arr"))
+					return log(new Symbol(Symbol.Token.ARR,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("else"))
+					return log(new Symbol(Symbol.Token.ELSE,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("end"))
+					return log(new Symbol(Symbol.Token.END,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("for"))
+					return log(new Symbol(Symbol.Token.FOR,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("fun"))
+					return log(new Symbol(Symbol.Token.FUN,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("if"))
+					return log(new Symbol(Symbol.Token.IF,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("then"))
+					return log(new Symbol(Symbol.Token.THEN,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("ptr"))
+					return log(new Symbol(Symbol.Token.PTR,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("rec"))
+					return log(new Symbol(Symbol.Token.REC,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("typ"))
+					return log(new Symbol(Symbol.Token.TYP,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("var"))
+					return log(new Symbol(Symbol.Token.VAR,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("where"))
+					return log(new Symbol(Symbol.Token.WHERE,new Position(srcName,line,col-i,srcName,line,col)));
+				else if(id.equals("while"))
+					return log(new Symbol(Symbol.Token.WHILE,new Position(srcName,line,col-i,srcName,line,col)));
 				else throw new CompilerError("Not implemented yet.");
 			}
 		}else if(((int)c)==10){
