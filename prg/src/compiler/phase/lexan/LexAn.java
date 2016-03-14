@@ -242,7 +242,7 @@ public class LexAn extends Phase {
 		}
 
 		if(Character.isDigit(c)){
-			int val = 0;
+			long val = 0;
 			int i = 0;
 			do{
 				val = 10*val + Character.digit(c,10);
