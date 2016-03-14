@@ -271,7 +271,19 @@ public class LexAn extends Phase {
 			tempc = c;
 			return log(new Symbol(Symbol.Token.CONST_INTEGER,""+val,new Position(srcName,line,col-i,srcName,line,col)));
 		}else if(Character.isLetter(c) || c=='_'){
-			if(c=='_') throw new CompilerError("Not implemented yet._");
+			if(c=='_'){
+				String id = ""+c;
+				int i = 0;
+				c = (char)srcFile.read();
+				while(Character.isLetter(c) || Character.isDigit(c) || c=='_'){
+					id+=c;
+					i++;
+					col++;
+					c = (char)srcFile.read();
+				}
+				tempc = c;
+				return log(new Symbol(Symbol.Token.IDENTIFIER,id,new Position(srcName,line,col-i,srcName,line,col)));
+			}
 			else{
 				String id = ""+c;
 				int i = 0;
@@ -325,7 +337,7 @@ public class LexAn extends Phase {
 					return log(new Symbol(Symbol.Token.WHERE,new Position(srcName,line,col-i,srcName,line,col)));
 				else if(id.equals("while"))
 					return log(new Symbol(Symbol.Token.WHILE,new Position(srcName,line,col-i,srcName,line,col)));
-				else throw new CompilerError("Not implemented yet.");
+				else return log(new Symbol(Symbol.Token.IDENTIFIER,id,new Position(srcName,line,col-i,srcName,line,col)));
 			}
 		}else if(((int)c)==10){
 			return lexAn();
