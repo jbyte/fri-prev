@@ -80,10 +80,10 @@ public class LexAn extends Phase {
 		//}
 
 		char c = '\0';
-		if(tempc=='\0' || tempc=='\r' || tempc=='\n' || tempc=='\t' || tempc==' ' || ((int)tempc)==10){
-			tempc = '\0';
+		if(tempc=='\0' || tempc=='\r' || tempc=='\n' || tempc=='\t' || tempc==' ' || tempc=='#'){
 			while(srcFile.ready()){
-				c = (char)srcFile.read();
+				if(tempc!='#')c = (char)srcFile.read();
+				else c = tempc;
 				if(c==' '){
 					col++;
 					continue;
@@ -96,15 +96,25 @@ public class LexAn extends Phase {
 					continue;
 				}else if(c=='\r'){
 					continue;
-				}else if(((int)c)==10){
+				}else if(c=='#'){
+					do{
+						c = (char)srcFile.read();
+					}while(c!='\n');
+					col = 0;
 					line++;
-					col=0;
-					continue;
 				}else break;
 			}
+			tempc = '\0';
 		}else{
 			c = tempc;
 			tempc = '\0';
+			if(c=='#'){
+				do{
+					c = (char)srcFile.read();
+				}while(c!='\n');
+				col = 0;
+				line++;
+			}
 		}
 
 		if(((int)c)==-1 || ((int)c)==0)
