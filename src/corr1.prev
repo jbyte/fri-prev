@@ -1,0 +1,11 @@
+for(i=0,i<=3,i++){
+	print("test string\n") # comment
+}
+
+var tmp = 1009
+tmp = tmp % 2
+
+fun test(var x, var y) : boolean {
+	if(x|y) then do_something()
+	else do_nothing()
+}

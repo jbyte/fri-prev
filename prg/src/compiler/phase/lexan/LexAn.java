@@ -88,7 +88,7 @@ public class LexAn extends Phase {
 					col++;
 					continue;
 				}else if(c=='\t'){
-					col+=4;
+					col++;
 					continue;
 				}else if(c=='\n'){
 					line++;
@@ -211,7 +211,7 @@ public class LexAn extends Phase {
 					col++;
 					i++;
 					if((int)c>=32 && (int)c<=126){
-						if(c=='\n' || c=='#') throw new CompilerError("Unexpected end of string.");
+						if(c=='\n') throw new CompilerError("Unexpected end of string.");
 						else if(c=='\\'){
 							c = (char)srcFile.read();
 							col++;
@@ -222,6 +222,7 @@ public class LexAn extends Phase {
 						}else str+=c;
 					}else throw new CompilerError("Invalid character name: "+(int)c+"("+c+").");
 				}
+				col++;
 				return log(new Symbol(Symbol.Token.CONST_STRING,"\""+str+"\"",new Position(srcName,line,col-i,srcName,line,col)));
 			case '\'':
 				int tmp = srcFile.read();
@@ -342,7 +343,7 @@ public class LexAn extends Phase {
 		}else if(((int)c)==10){
 			return lexAn();
 		}else{
-			return log(new Symbol(Symbol.Token.BOOLEAN,new Position(srcName,line,col)));
+			throw new CompilerError("Unsupported character: "+c+"("+(int)c+")"+" at position: "+line+","+col);
 		}
 		//throw new CompilerError("symbol/identifier/number not implemented yet: "+(int)c+":"+line+","+col);
 	}
