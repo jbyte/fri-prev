@@ -21,3 +21,8 @@ hs_err_pid*
 # vim swap files
 *.swp
 *.swo
+
+# zip/tar ball files
+*.zip
+*.rar
+*.tar.gz

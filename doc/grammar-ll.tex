@@ -1,0 +1,123 @@
+\production{ \nont{Prog} }{ \nont{Expr} }
+\smallskip
+\production{ \term{} }{ \nont{Expr} \nont{AssExpr} \nont{Expr'} }
+\smallskip
+\production{ \term{} }{ \nont{Expr'} \term{#} }
+\production{ \term{} }{ \term{where} \nont{Decs} \term{end} \nont{Expr'} }
+\smallskip
+\production{ \term{} }{ \nont{Exprs} \nont{Expr} \nont{Exprs'} }
+\smallskip
+\production{ \term{} }{ \nont{Exprs'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"2C}} \nont{Expr} \nont{Exprs'} }
+\smallskip
+\production{ \term{} }{ \nont{AssExpr} \nont{DisExpr} \nont{AssExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{AssExpr'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"3D}} \nont{DisExpr} \nont{AssExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{DisExpr} \nont{ConExpr} \nont{DisExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{DisExpr'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"7C}} \nont{ConExpr} \nont{DisExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{ConExpr} \nont{RelExpr} \nont{ConExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{ConExpr'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"26}} \nont{RelExpr} \nont{ConExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{RelExpr} \nont{AddExpr} \nont{RelExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{RelExpr'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"3D}\symbol{"3D}} \nont{AddExpr} \nont{RelExpr'} }
+\production{ \term{} }{ \term{\symbol{"21}\symbol{"3D}} \nont{AddExpr} \nont{RelExpr'} }
+\production{ \term{} }{ \term{\symbol{"3C}} \nont{AddExpr} \nont{RelExpr'} }
+\production{ \term{} }{ \term{\symbol{"3E}} \nont{AddExpr} \nont{RelExpr'} }
+\production{ \term{} }{ \term{\symbol{"3C}\symbol{"3D}} \nont{AddExpr} \nont{RelExpr'} }
+\production{ \term{} }{ \term{\symbol{"3E}\symbol{"3D}} \nont{AddExpr} \nont{RelExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{AddExpr} \nont{MulExpr} \nont{AddExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{AddExpr'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"2B}} \nont{MulExpr} \nont{AddExpr'} }
+\production{ \term{} }{ \term{\symbol{"2D}} \nont{MulExpr} \nont{AddExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{MulExpr} \nont{PreExpr} \nont{MulExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{MulExpr'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"2A}} \nont{PreExpr} \nont{MulExpr'} }
+\production{ \term{} }{ \term{\symbol{"2F}} \nont{PreExpr} \nont{MulExpr'} }
+\production{ \term{} }{ \term{\symbol{"25}} \nont{PreExpr} \nont{MulExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{PreExpr} \nont{PostExpr} }
+\production{ \term{} }{ \term{\symbol{"2B}} \nont{PreExpr} }
+\production{ \term{} }{ \term{\symbol{"2D}} \nont{PreExpr} }
+\production{ \term{} }{ \term{\symbol{"21}} \nont{PreExpr} }
+\production{ \term{} }{ \term{\symbol{"40}} \nont{PreExpr} }
+\production{ \term{} }{ \term{\symbol{"5B}} \nont{Type} \term{\symbol{"5D}} \nont{PreExpr} }
+\smallskip
+\production{ \term{} }{ \nont{PostExpr} \nont{AtomExpr} \nont{PostExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{PostExpr'} \term{#} }
+\production{ \term{} }{ \term{\symbol{"5B}} \nont{Expr} \term{\symbol{"5D}} \nont{PostExpr'} }
+\production{ \term{} }{ \term{\symbol{"2E}} \term{IDENTIFIER} \nont{PostExpr'} }
+\production{ \term{} }{ \term{\symbol{"5E}} \nont{PostExpr'} }
+\smallskip
+\production{ \term{} }{ \nont{AtomExpr} \term{const_integer} }
+\production{ \term{} }{ \term{const_boolean} }
+\production{ \term{} }{ \term{const_char} }
+\production{ \term{} }{ \term{const_string} }
+\production{ \term{} }{ \term{const_null} }
+\production{ \term{} }{ \term{const_none} }
+\production{ \term{} }{ \term{IDENTIFIER} \nont{ArgsOpt} }
+\production{ \term{} }{ \term{\symbol{"28}} \nont{Exprs} \term{closing_paranthesis} }
+\production{ \term{} }{ \term{if} \nont{Expr} \term{then} \nont{Expr} \term{else} \nont{Expr} \term{end} }
+\production{ \term{} }{ \term{for} \term{IDENTIFIER} \term{\symbol{"3D}} \nont{Expr} \term{\symbol{"2C}} \nont{Expr} \term{\symbol{"3A}} \nont{Expr} \term{end} }
+\production{ \term{} }{ \term{while} \nont{Expr} \term{\symbol{"3A}} \nont{Expr} \term{end} }
+\smallskip
+\production{ \term{} }{ \nont{ArgsOpt} \term{#} }
+\production{ \term{} }{ \term{opening_paranthesis} \nont{Expr} \term{closing_paranthesis} }
+\smallskip
+\production{ \term{} }{ \nont{Desc} \nont{Dec} \nont{Decs'} }
+\smallskip
+\production{ \term{} }{ \nont{Decs'} \term{#} }
+\production{ \term{} }{ \nont{Dec} \nont{Desc'} }
+\smallskip
+\production{ \term{} }{ \nont{Dec} \nont{TypeDec} }
+\production{ \term{} }{ \nont{FunDec} }
+\production{ \term{} }{ \nont{VarDec} }
+\smallskip
+\production{ \term{} }{ \nont{TypeDec} \term{typ} \term{IDENTIFIER} \term{\symbol{"3A}} \nont{Type} }
+\smallskip
+\production{ \term{} }{ \nont{FunDec} \term{fun} \term{IDENTIFIER} \term{opening_paranthesis} \nont{ParamsOpt} \term{closing_paranthesis} \term{\symbol{"3A}} \nont{Type} \nont{FunBodyOpt} }
+\smallskip
+\production{ \term{} }{ \nont{ParamsOpt} \term{#} }
+\production{ \term{} }{ \nont{Params} }
+\smallskip
+\production{ \term{} }{ \nont{Params} \nont{Param} \nont{Params'} }
+\smallskip
+\production{ \term{} }{ \nont{Params'} \term{#} }
+\production{ \term{} }{ \nont{Param} \nont{Params'} }
+\smallskip
+\production{ \term{} }{ \nont{Param} \term{IDENTIFIER} \term{\symbol{"3A}} \nont{Type} }
+\smallskip
+\production{ \term{} }{ \nont{FunBodyOpt} \term{#} }
+\production{ \term{} }{ \term{\symbol{"3D}} \nont{Expr} }
+\smallskip
+\production{ \term{} }{ \nont{VarDec} \term{var} \term{IDENTIFIER} \term{\symbol{"3A}} \nont{Type} }
+\smallskip
+\production{ \term{} }{ \nont{Type} \term{integer} }
+\production{ \term{} }{ \term{boolean} }
+\production{ \term{} }{ \term{char} }
+\production{ \term{} }{ \term{string} }
+\production{ \term{} }{ \term{void} }
+\production{ \term{} }{ \term{arr} \term{\symbol{"5B}} \nont{Expr} \term{\symbol{"5D}} \nont{Type} }
+\production{ \term{} }{ \term{rec} \term{\symbol{"7B}} \nont{Comps} \term{closing_brace} }
+\production{ \term{} }{ \term{ptr} \nont{Type} }
+\production{ \term{} }{ \term{identifier} }
+\smallskip
+\production{ \term{} }{ \nont{Comps} \nont{Comp} \nont{Comps'} }
+\smallskip
+\production{ \term{} }{ \nont{Comps'} \term{#} }
+\production{ \term{} }{ \nont{Comp} \nont{Comps'} }
+\smallskip
+\production{ \term{} }{ \nont{Comp} \term{IDENTIFIER} \term{\symbol{"3A}} \nont{Type} }

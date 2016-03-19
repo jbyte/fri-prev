@@ -1,0 +1,197 @@
+Prog ->
+	 Expr
+	.
+	
+Expr ->
+	 AssExpr Expr'
+	.
+
+Expr' ->
+	 #
+	| WHERE Decs END Expr'
+	.
+	
+Exprs ->
+	 Expr Exprs'
+	.
+	
+Exprs' ->
+	 #
+	| COMMA Expr Exprs'
+	.
+	
+AssExpr ->
+	 DisExpr AssExpr'
+	.
+
+AssExpr' ->
+	 #
+	| ASSIGN DisExpr AssExpr'
+	.
+	
+DisExpr ->
+	 ConExpr DisExpr'
+	.
+	
+DisExpr' ->
+	 #
+	| OR ConExpr DisExpr'
+	.
+	
+ConExpr ->
+	 RelExpr ConExpr'
+	.
+	
+ConExpr' ->
+	 #
+	| AND RelExpr ConExpr'
+	.
+	
+RelExpr ->
+	 AddExpr RelExpr'
+	.
+	
+RelExpr' ->
+	 #
+	| EQU AddExpr RelExpr'
+	| NEQ AddExpr RelExpr'
+	| LTH AddExpr RelExpr'
+	| GTH AddExpr RelExpr'
+	| LEQ AddExpr RelExpr'
+	| GEQ AddExpr RelExpr'
+	.
+	
+AddExpr ->
+	 MulExpr AddExpr'
+	.
+	
+AddExpr' ->
+	 #
+	| ADD MulExpr AddExpr'
+	| SUB MulExpr AddExpr'
+	.
+	
+MulExpr ->
+	 PreExpr MulExpr'
+	.
+	
+MulExpr' ->
+	 #
+	| MUL PreExpr MulExpr'
+	| DIV PreExpr MulExpr'
+	| MOD PreExpr MulExpr'
+	.
+	
+PreExpr ->
+	 PostExpr
+	| ADD PreExpr
+	| SUB PreExpr
+	| NOT PreExpr
+	| MEM PreExpr
+	| OPENING_BRACKET Type CLOSING_BRACKET PreExpr
+	.
+	
+PostExpr ->
+	 AtomExpr PostExpr'
+	.
+	
+PostExpr' ->
+	 #
+	| OPENING_BRACKET Expr CLOSING_BRACKET PostExpr'
+	| DOT IDENTIFIER PostExpr'
+	| VAL PostExpr'
+	.
+
+AtomExpr ->
+	 CONST_INTEGER
+	| CONST_BOOLEAN
+	| CONST_CHAR
+	| CONST_STRING
+	| CONST_NULL
+	| CONST_NONE
+	| IDENTIFIER ArgsOpt
+	| OPENING_PARENTHESIS Exprs CLOSING_PARANTHESIS
+	| IF Expr THEN Expr ELSE Expr END
+	| FOR IDENTIFIER ASSIGN Expr COMMA Expr COLON Expr END
+	| WHILE Expr COLON Expr END
+	.
+	
+ArgsOpt ->
+	 #
+	| OPENING_PARANTHESIS Expr CLOSING_PARANTHESIS
+	.
+	
+Desc ->
+	 Dec Decs'
+	.
+	
+Decs' ->
+	 #
+	| Dec Desc'
+	.
+	
+Dec ->
+	 TypeDec
+	| FunDec
+	| VarDec
+	.
+	
+TypeDec ->
+	 TYP IDENTIFIER COLON Type
+	.
+	
+FunDec ->
+	 FUN IDENTIFIER OPENING_PARANTHESIS ParamsOpt CLOSING_PARANTHESIS COLON Type FunBodyOpt
+	.
+	
+ParamsOpt ->
+	 #
+	| Params
+	.
+	
+Params ->
+	 Param Params'
+	.
+	
+Params' ->
+	 #
+	| Param Params'
+	.
+
+Param ->
+	 IDENTIFIER COLON Type
+	.
+	
+FunBodyOpt ->
+	 #
+	| ASSIGN Expr
+	.
+	
+VarDec ->
+	 VAR IDENTIFIER COLON Type
+	.
+	
+Type ->
+	 INTEGER
+	| BOOLEAN
+	| CHAR
+	| STRING
+	| VOID
+	| ARR OPENING_BRACKET Expr CLOSING_BRACKET Type
+	| REC OPENING_BRACE Comps CLOSING_BRACE
+	| PTR Type
+	| IDENTIFIER
+	.
+	
+Comps ->
+	 Comp Comps'
+	.
+	
+Comps' ->
+	 #
+	| Comp Comps'
+	.
+	
+Comp ->
+	 IDENTIFIER COLON Type
+	.
