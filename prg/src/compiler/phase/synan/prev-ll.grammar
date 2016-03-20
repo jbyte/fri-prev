@@ -121,13 +121,13 @@ ArgsOpt ->
 	| OPENING_PARANTHESIS Expr CLOSING_PARANTHESIS
 	.
 	
-Desc ->
+Decs ->
 	 Dec Decs'
 	.
 	
 Decs' ->
 	 #
-	| Dec Desc'
+	| Dec Decs'
 	.
 	
 Dec ->
@@ -192,6 +192,6 @@ Comps' ->
 	| Comp Comps'
 	.
 	
-Comp ->
+Comp
 	 IDENTIFIER COLON Type
 	.

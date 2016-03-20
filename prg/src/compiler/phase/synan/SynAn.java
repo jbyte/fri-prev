@@ -1,6 +1,7 @@
 package compiler.phase.synan;
 
 import java.util.*;
+import java.io.IOException;
 
 import org.w3c.dom.*;
 
@@ -94,7 +95,7 @@ public class SynAn extends Phase {
 	 * @return The previous symbol (the one that has just been replaced by the
 	 *         new symbol).
 	 */
-	private Symbol nextSymbol() {
+	private Symbol nextSymbol() throws IOException{
 		Symbol symbol = laSymbol;
 		symbol.log(logger);
 		laSymbol = lexAn.lexAn();
@@ -141,7 +142,7 @@ public class SynAn extends Phase {
 	 * 
 	 * This method performs the syntax analysis of the source file.
 	 */
-	public void synAn() {
+	public void synAn() throws IOException{
 		laSymbol = lexAn.lexAn();
 		parseProgram();
 		if (laSymbol.token != Symbol.Token.EOF)
@@ -151,15 +152,168 @@ public class SynAn extends Phase {
 	// All these methods are a part of a recursive descent implementation of an
 	// LL(1) parser.
 
-	private void parseProgram() {
+	private void parseProgram()  throws IOException{
 		begLog("Program");
 		parseExpression();
 		endLog();
 	}
-	
-	// TODO
 
-	private void parseVariableDeclaration() {
+	private void parseExpression() throws IOException{
+		begLog("Expression");
+		parseAssignmentExpression();
+		parseExpression_();
+		endLog();
+	}
+
+	private void parseExpression_() throws IOException{
+		begLog("Expression'");
+		switch(laSymbol.token){
+			case WHERE:
+				Symbol symWhere = nextSymbol();
+				parseDeclarations();
+				Symbol symEnd;
+				if(laSymbol.token == Symbol.Token.END){
+					symEnd = nextSymbol();
+				}else{
+					Report.warning(laSymbol, "Missing end inserted.");
+					symEnd = nextSymbolIsError();
+				}
+				parseExpression_();
+				break;
+			case END:
+			case COMMA:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF: break;
+			default:
+				throw new InternalCompilerError();
+		}
+		endLog();
+	}
+	private void parseExpressions() throws IOException{
+		begLog("Expressions");
+		endLog();
+	}
+	private void parseExpressions_() throws IOException{
+		begLog("Expressions'");
+		endLog();
+	}
+	private void parseAssignmentExpression() throws IOException{
+		begLog("AssignmentExpression");
+		endLog();
+	}
+	private void parseAssignmentExpression_() throws IOException{
+		begLog("AssignmentExpression'");
+		endLog();
+	}
+	private void parseDisjunctiveExpression() throws IOException{
+		begLog("DisjunctiveExpression");
+		endLog();
+	}
+	private void parseDisjunctiveExpression_() throws IOException{
+		begLog("DisjunctiveExpression'");
+		endLog();
+	}
+	private void parseConjunctiveExpression() throws IOException{
+		begLog("ConjunctiveExpression");
+		endLog();
+	}
+	private void parseConjunctiveExpression_() throws IOException{
+		begLog("ConjunctiveExpression'");
+		endLog();
+	}
+	private void parseRelationalExpression() throws IOException{
+		begLog("RelativeExpression");
+		endLog();
+	}
+	private void parseRelationalExpression_() throws IOException{
+		begLog("RelativeExpression'");
+		endLog();
+	}
+	private void parseAdditiveExpression() throws IOException{
+		begLog("AdditiveExpression");
+		endLog();
+	}
+	private void parseAdditiveExpression_() throws IOException{
+		begLog("AdditiveExpression'");
+		endLog();
+	}
+	private void parseMultiplicativeExpression() throws IOException{
+		begLog("MultiplicativeExpression");
+		endLog();
+	}
+	private void parseMultiplicativeExpression_() throws IOException{
+		begLog("MultiplicativeExperssion'");
+		endLog();
+	}
+	private void parsePrefixExpression() throws IOException{
+		begLog("PrefixExpression");
+		endLog();
+	}
+	private void parsePostfixExpression() throws IOException{
+		begLog("PostfixExpression");
+		endLog();
+	}
+	private void parsePostfixExpression_() throws IOException{
+		begLog("PostfixExpression'");
+		endLog();
+	}
+	private void parseAtomicExpression() throws IOException{
+		begLog("AtomicExpression");
+		endLog();
+	}
+	private void parseArgumentsOpt() throws IOException{
+		begLog("ArgumentsOpt");
+		endLog();
+	}
+	private void parseDeclarations() throws IOException{
+		begLog("Declarations");
+		endLog();
+	}
+	private void parseDeclarations_() throws IOException{
+		begLog("Declarations'");
+		endLog();
+	}
+	private void parseDeclaration() throws IOException{
+		begLog("Declaration");
+		endLog();
+	}
+	private void parseTypeDeclaration() throws IOException{
+		begLog("TypeDeclaration");
+		endLog();
+	}
+	private void parseFunctionDeclaration() throws IOException{
+		begLog("FunctionDeclaration");
+		endLog();
+	}
+	private void parseParametersOpt() throws IOException{
+		begLog("ParametersOpt");
+		endLog();
+	}
+	private void parseParameters() throws IOException{
+		begLog("Parameters");
+		endLog();
+	}
+	private void parseParameters_() throws IOException{
+		begLog("Parameters'");
+		endLog();
+	}
+	private void parseParameter() throws IOException{
+		begLog("Parameter");
+		endLog();
+	}
+	private void parseFunctionBodyOpt() throws IOException{
+		begLog("FunctionBodyOpt");
+		endLog();
+	}
+	
+	private void parseVariableDeclaration() throws IOException{
 		begLog("VariableDeclaration");
 		switch (laSymbol.token) {
 		case VAR: {
@@ -186,6 +340,22 @@ public class SynAn extends Phase {
 		endLog();
 	}
 	
-	// TODO
+	private void parseType() throws IOException{
+		begLog("Type");
+		endLog();
+	}
+	private void parseComponents() throws IOException{
+		begLog("Components");
+		endLog();
+	}
+	private void parseComponents_() throws IOException{
+		begLog("Components'");
+		endLog();
+	}
+	private void parseComponent() throws IOException{
+		begLog("Component");
+		endLog();
+	}
+
 
 }
