@@ -853,6 +853,19 @@ public class SynAn extends Phase {
 	}
 	private void parseFunctionBodyOpt() throws IOException{
 		begLog("FunctionBodyOpt");
+		switch(laSymbol.token){
+			case ASSIGN:
+				nextSymbol();
+				parseExpression();
+				break;
+			case TYP:
+			case FUN:
+			case VAR:
+			case END:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	
@@ -885,18 +898,93 @@ public class SynAn extends Phase {
 	
 	private void parseType() throws IOException{
 		begLog("Type");
+		switch(laSymbol.token){
+			case INTEGER:
+			case BOOLEAN:
+			case CHAR:
+			case STRING:
+			case VOID:
+			case IDENTIFIER:
+				nextSymbol();
+				break;
+			case ARR:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.OPENING_BRACKET){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'[\' inserted.");
+					nextSymbolIsError();
+				}
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \']\' inserted.");
+					nextSymbolIsError();
+				}
+				parseType();
+				break;
+			case REC:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.OPENING_BRACE){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'{\' inserted.");
+					nextSymbolIsError();
+				}
+				parseComponents();
+				if(laSymbol.token == Symbol.Token.CLOSING_BRACE){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'}\' inserted.");
+					nextSymbolIsError();
+				}
+				break;
+			case PTR:
+				nextSymbol();
+				parseType();
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseComponents() throws IOException{
 		begLog("Components");
+		parseComponent();
+		parseComponents_();
 		endLog();
 	}
 	private void parseComponents_() throws IOException{
 		begLog("Components'");
+		switch(laSymbol.token){
+			case IDENTIFIER:
+				parseComponent();
+				parseComponents_();
+				break;
+			case CLOSING_BRACE:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseComponent() throws IOException{
 		begLog("Component");
+		switch(laSymbol.token){
+			case IDENTIFIER:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.COLON){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \':\' inserted.");
+					nextSymbolIsError();
+				}
+				parseType();
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 
