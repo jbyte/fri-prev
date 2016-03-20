@@ -169,14 +169,13 @@ public class SynAn extends Phase {
 		begLog("Expression'");
 		switch(laSymbol.token){
 			case WHERE:
-				Symbol symWhere = nextSymbol();
+				nextSymbol();
 				parseDeclarations();
-				Symbol symEnd;
 				if(laSymbol.token == Symbol.Token.END){
-					symEnd = nextSymbol();
+					nextSymbol();
 				}else{
 					Report.warning(laSymbol, "Missing end inserted.");
-					symEnd = nextSymbolIsError();
+					nextSymbolIsError();
 				}
 				parseExpression_();
 				break;
@@ -319,30 +318,168 @@ public class SynAn extends Phase {
 	}
 	private void parseRelationalExpression() throws IOException{
 		begLog("RelativeExpression");
+		parseAdditiveExpression();
+		parseRelationalExpression_();
 		endLog();
 	}
 	private void parseRelationalExpression_() throws IOException{
 		begLog("RelativeExpression'");
+		switch(laSymbol.token){
+			case EQU:
+			case NEQ:
+			case LTH:
+			case GTH:
+			case LEQ:
+			case GEQ:
+				nextSymbol();
+				parseAdditiveExpression();
+				parseRelationalExpression_();
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case ASSIGN:
+			case OR:
+			case AND:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseAdditiveExpression() throws IOException{
 		begLog("AdditiveExpression");
+		parseMultiplicativeExpression();
+		parseAdditiveExpression_();
 		endLog();
 	}
 	private void parseAdditiveExpression_() throws IOException{
 		begLog("AdditiveExpression'");
+		switch(laSymbol.token){
+			case ADD:
+			case SUB:
+				nextSymbol();
+				parseMultiplicativeExpression();
+				parseAdditiveExpression_();
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case ASSIGN:
+			case OR:
+			case AND:
+			case EQU:
+			case NEQ:
+			case LTH:
+			case GTH:
+			case LEQ:
+			case GEQ:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseMultiplicativeExpression() throws IOException{
 		begLog("MultiplicativeExpression");
+		parsePrefixExpression();
+		parseMultiplicativeExpression_();
 		endLog();
 	}
 	private void parseMultiplicativeExpression_() throws IOException{
 		begLog("MultiplicativeExperssion'");
+		switch(laSymbol.token){
+			case MUL:
+			case DIV:
+			case MOD:
+				nextSymbol();
+				parsePrefixExpression();
+				parseMultiplicativeExpression_();
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case ASSIGN:
+			case OR:
+			case AND:
+			case EQU:
+			case NEQ:
+			case LTH:
+			case GTH:
+			case LEQ:
+			case GEQ:
+			case ADD:
+			case SUB:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parsePrefixExpression() throws IOException{
 		begLog("PrefixExpression");
+		switch(laSymbol.token){
+			case ADD:
+			case SUB:
+			case NOT:
+			case MEM:
+				nextSymbol();
+				parsePrefixExpression();
+				break;
+			case OPENING_BRACKET:
+				nextSymbol();
+				parseType();
+				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
+					nextSymbol();
+				}else{
+					Report.warning(laSymbol, "Missing \']\' inserted.");
+					nextSymbolIsError();
+				}
+				parsePrefixExpression();
+				break;
+			case IDENTIFIER:
+			case CONST_INTEGER:
+			case CONST_BOOLEAN:
+			case CONST_CHAR:
+			case CONST_STRING:
+			case CONST_NULL:
+			case CONST_NONE:
+			case OPENING_PARENTHESIS:
+			case IF:
+			case FOR:
+			case WHILE:
+				parsePostfixExpression();
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parsePostfixExpression() throws IOException{
