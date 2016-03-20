@@ -190,7 +190,8 @@ public class SynAn extends Phase {
 			case TYP:
 			case FUN:
 			case VAR:
-			case EOF: break;
+			case EOF:
+				break;
 			default:
 				throw new InternalCompilerError();
 		}
@@ -198,34 +199,122 @@ public class SynAn extends Phase {
 	}
 	private void parseExpressions() throws IOException{
 		begLog("Expressions");
+		parseExpression();
+		parseExpressions_();
 		endLog();
 	}
 	private void parseExpressions_() throws IOException{
 		begLog("Expressions'");
+		switch(laSymbol.token){
+			case COMMA:
+				nextSymbol();
+				parseExpression();
+				parseExpressions_();
+				break;
+			case CLOSING_PARENTHESIS:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseAssignmentExpression() throws IOException{
 		begLog("AssignmentExpression");
+		parseDisjunctiveExpression();
+		parseAssignmentExpression_();
 		endLog();
 	}
 	private void parseAssignmentExpression_() throws IOException{
 		begLog("AssignmentExpression'");
+		switch(laSymbol.token){
+			case ASSIGN:
+				nextSymbol();
+				parseDisjunctiveExpression();
+				parseAssignmentExpression_();
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseDisjunctiveExpression() throws IOException{
 		begLog("DisjunctiveExpression");
+		parseConjunctiveExpression();
+		parseDisjunctiveExpression_();
 		endLog();
 	}
 	private void parseDisjunctiveExpression_() throws IOException{
 		begLog("DisjunctiveExpression'");
+		switch(laSymbol.token){
+			case OR:
+				nextSymbol();
+				parseConjunctiveExpression();
+				parseDisjunctiveExpression_();
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case ASSIGN:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseConjunctiveExpression() throws IOException{
 		begLog("ConjunctiveExpression");
+		parseRelationalExpression();
+		parseConjunctiveExpression_();
 		endLog();
 	}
 	private void parseConjunctiveExpression_() throws IOException{
 		begLog("ConjunctiveExpression'");
+		switch(laSymbol.token){
+			case AND:
+				nextSymbol();
+				parseRelationalExpression();
+				parseConjunctiveExpression_();
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case ASSIGN:
+			case OR:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseRelationalExpression() throws IOException{
