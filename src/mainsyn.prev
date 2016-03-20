@@ -1,0 +1,12 @@
+main(
+	test,
+	tmp = [integer](foo & !foo),
+	for i=0, i+2 : -i end
+)where
+	typ test:testType
+	var tmp:integer
+	fun foo():boolean = (
+		tmp = tmp + 2,
+		!tmp
+	)
+end

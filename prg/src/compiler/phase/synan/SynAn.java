@@ -478,6 +478,7 @@ public class SynAn extends Phase {
 				parsePostfixExpression();
 				break;
 			default:
+				System.out.println(laSymbol.token);
 				throw new InternalCompilerError();
 		}
 		endLog();
@@ -658,7 +659,7 @@ public class SynAn extends Phase {
 		switch(laSymbol.token){
 			case OPENING_PARENTHESIS:
 				nextSymbol();
-				parseExpression();
+				parseExpressions();
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
@@ -719,6 +720,7 @@ public class SynAn extends Phase {
 			case END:
 				break;
 			default:
+				System.out.println(laSymbol.token);
 				throw new InternalCompilerError();
 		}
 		endLog();

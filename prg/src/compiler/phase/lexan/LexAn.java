@@ -270,6 +270,8 @@ public class LexAn extends Phase {
 				col++;
 			}while(Character.isDigit(c));
 			tempc = c;
+			col--;
+			i--;
 			return log(new Symbol(Symbol.Token.CONST_INTEGER,""+val,new Position(srcName,line,col-i,srcName,line,col)));
 		}else if(Character.isLetter(c) || c=='_'){
 			if(c=='_'){
