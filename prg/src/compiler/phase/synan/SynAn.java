@@ -742,26 +742,113 @@ public class SynAn extends Phase {
 	}
 	private void parseTypeDeclaration() throws IOException{
 		begLog("TypeDeclaration");
+		switch(laSymbol.token){
+			case TYP:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.IDENTIFIER){
+					nextSymbol();
+				}else{
+					Report.warning("Missing identifier inserted.");
+					nextSymbolIsError();
+				}
+				if(laSymbol.token == Symbol.Token.COLON){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \':\' inserted.");
+					nextSymbolIsError();
+				}
+				parseType();
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseFunctionDeclaration() throws IOException{
 		begLog("FunctionDeclaration");
+		switch(laSymbol.token){
+			case FUN:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.IDENTIFIER){
+					nextSymbol();
+				}else{
+					Report.warning("Missing identifier inserted.");
+					nextSymbolIsError();
+				}
+				if(laSymbol.token == Symbol.Token.OPENING_PARENTHESIS){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'(\' inserted.");
+					nextSymbolIsError();
+				}
+				parseParametersOpt();
+				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \')\' inserted.");
+					nextSymbolIsError();
+				}
+				if(laSymbol.token == Symbol.Token.COLON){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \':\' inserted.");
+					nextSymbolIsError();
+				}
+				parseType();
+				parseFunctionBodyOpt();
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseParametersOpt() throws IOException{
 		begLog("ParametersOpt");
+		switch(laSymbol.token){
+			case IDENTIFIER:
+				parseParameters();
+			case CLOSING_PARENTHESIS:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseParameters() throws IOException{
 		begLog("Parameters");
+		parseParameter();
+		parseParameters_();
 		endLog();
 	}
 	private void parseParameters_() throws IOException{
-		begLog("Parameters'");
+		begLog("Parameters'");	
+		switch(laSymbol.token){
+			case IDENTIFIER:
+				parseParameter();
+				parseParameters_();
+			case CLOSING_PARENTHESIS:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseParameter() throws IOException{
 		begLog("Parameter");
+		switch(laSymbol.token){
+			case IDENTIFIER:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.COLON){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \':\' inserted.");
+					nextSymbolIsError();
+				}
+				parseType();
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseFunctionBodyOpt() throws IOException{
