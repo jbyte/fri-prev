@@ -484,30 +484,260 @@ public class SynAn extends Phase {
 	}
 	private void parsePostfixExpression() throws IOException{
 		begLog("PostfixExpression");
+		parseAtomicExpression();
+		parsePostfixExpression_();
 		endLog();
 	}
 	private void parsePostfixExpression_() throws IOException{
 		begLog("PostfixExpression'");
+		switch(laSymbol.token){
+			case OPENING_BRACKET:
+				nextSymbol();
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
+					nextSymbol();
+				}else{
+					Report.warning(laSymbol,"Missing \'[\' inserted.");
+					nextSymbolIsError();
+				}
+				parsePostfixExpression_();
+				break;
+			case DOT:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.IDENTIFIER){
+					nextSymbol();
+				}else{
+					Report.warning(laSymbol,"Missing identifier inserted.");
+					nextSymbolIsError();
+				}
+				parsePostfixExpression_();
+				break;
+			case VAL:
+				nextSymbol();
+				parsePostfixExpression_();
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case ASSIGN:
+			case OR:
+			case AND:
+			case EQU:
+			case NEQ:
+			case LTH:
+			case GTH:
+			case LEQ:
+			case GEQ:
+			case ADD:
+			case SUB:
+			case MUL:
+			case DIV:
+			case MOD:
+			case CLOSING_BRACKET:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseAtomicExpression() throws IOException{
 		begLog("AtomicExpression");
+		switch(laSymbol.token){
+			case CONST_INTEGER:
+			case CONST_BOOLEAN:
+			case CONST_CHAR:
+			case CONST_STRING:
+			case CONST_NULL:
+			case CONST_NONE:
+				nextSymbol();
+				break;
+			case IDENTIFIER:
+				nextSymbol();
+				parseArgumentsOpt();
+				break;
+			case OPENING_PARENTHESIS:
+				nextSymbol();
+				parseExpressions();
+				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \')\' inserted.");
+					nextSymbolIsError();
+				}
+				break;
+			case IF:
+				nextSymbol();
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.THEN){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'then\' inserted.");
+					nextSymbolIsError();
+				}
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.ELSE){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'else\' inserted.");
+					nextSymbolIsError();
+				}
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.END){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'end\' inserted.");
+					nextSymbolIsError();
+				}
+				break;
+			case FOR:
+				nextSymbol();
+				if(laSymbol.token == Symbol.Token.IDENTIFIER){
+					nextSymbol();
+				}else{
+					Report.warning("Missing identifier inserted.");
+					nextSymbolIsError();
+				}
+				if(laSymbol.token == Symbol.Token.ASSIGN){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'=\' inserted.");
+				}
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.COMMA){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \',\' inserted.");
+				}
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.COLON){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \':\' inserted.");
+					nextSymbolIsError();
+				}
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.END){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'end\' inserted.");
+					nextSymbol();
+				}
+				break;
+			case WHILE:
+				nextSymbol();
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.COLON){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \':\' inserted.");
+					nextSymbolIsError();
+				}
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.END){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \'end\' inserted.");
+					nextSymbolIsError();
+				}
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseArgumentsOpt() throws IOException{
 		begLog("ArgumentsOpt");
+		switch(laSymbol.token){
+			case OPENING_PARENTHESIS:
+				nextSymbol();
+				parseExpression();
+				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
+					nextSymbol();
+				}else{
+					Report.warning("Missing \')\' inserted.");
+					nextSymbolIsError();
+				}
+				break;
+			case WHERE:
+			case END:
+			case COMMA:
+			case ASSIGN:
+			case OR:
+			case AND:
+			case EQU:
+			case NEQ:
+			case LTH:
+			case GTH:
+			case LEQ:
+			case GEQ:
+			case ADD:
+			case SUB:
+			case MUL:
+			case DIV:
+			case MOD:
+			case OPENING_BRACKET:
+			case CLOSING_BRACKET:
+			case DOT:
+			case VAL:
+			case CLOSING_PARENTHESIS:
+			case THEN:
+			case ELSE:
+			case COLON:
+			case TYP:
+			case FUN:
+			case VAR:
+			case EOF:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseDeclarations() throws IOException{
 		begLog("Declarations");
+		parseDeclaration();
+		parseDeclarations_();
 		endLog();
 	}
 	private void parseDeclarations_() throws IOException{
 		begLog("Declarations'");
+		switch(laSymbol.token){
+			case TYP:
+			case FUN:
+			case VAR:
+				parseDeclaration();
+				parseDeclarations_();
+				break;
+			case END:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseDeclaration() throws IOException{
 		begLog("Declaration");
+		switch(laSymbol.token){
+			case TYP:
+				parseTypeDeclaration();
+				break;
+			case FUN:
+				parseFunctionDeclaration();
+				break;
+			case VAR:
+				parseVariableDeclaration();
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
 	}
 	private void parseTypeDeclaration() throws IOException{
