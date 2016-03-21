@@ -1,0 +1,1 @@
+(a & b | a*(b-a)) where var a:integer var b:integer end

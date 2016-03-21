@@ -174,7 +174,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
-					Report.warning(laSymbol, "Missing end inserted.");
 					nextSymbolIsError();
 				}
 				parseExpression_();
@@ -317,13 +316,13 @@ public class SynAn extends Phase {
 		endLog();
 	}
 	private void parseRelationalExpression() throws IOException{
-		begLog("RelativeExpression");
+		begLog("RelationalExpression");
 		parseAdditiveExpression();
 		parseRelationalExpression_();
 		endLog();
 	}
 	private void parseRelationalExpression_() throws IOException{
-		begLog("RelativeExpression'");
+		begLog("RelationalExpression'");
 		switch(laSymbol.token){
 			case EQU:
 			case NEQ:
@@ -459,7 +458,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
 					nextSymbol();
 				}else{
-					Report.warning(laSymbol, "Missing \']\' inserted.");
 					nextSymbolIsError();
 				}
 				parsePrefixExpression();
@@ -478,7 +476,6 @@ public class SynAn extends Phase {
 				parsePostfixExpression();
 				break;
 			default:
-				System.out.println(laSymbol.token);
 				throw new InternalCompilerError();
 		}
 		endLog();
@@ -498,7 +495,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
 					nextSymbol();
 				}else{
-					Report.warning(laSymbol,"Missing \'[\' inserted.");
 					nextSymbolIsError();
 				}
 				parsePostfixExpression_();
@@ -508,7 +504,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
 					nextSymbol();
 				}else{
-					Report.warning(laSymbol,"Missing identifier inserted.");
 					nextSymbolIsError();
 				}
 				parsePostfixExpression_();
@@ -570,7 +565,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \')\' inserted.");
 					nextSymbolIsError();
 				}
 				break;
@@ -580,21 +574,18 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.THEN){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'then\' inserted.");
 					nextSymbolIsError();
 				}
 				parseExpression();
 				if(laSymbol.token == Symbol.Token.ELSE){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'else\' inserted.");
 					nextSymbolIsError();
 				}
 				parseExpression();
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'end\' inserted.");
 					nextSymbolIsError();
 				}
 				break;
@@ -603,32 +594,27 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
 					nextSymbol();
 				}else{
-					Report.warning("Missing identifier inserted.");
 					nextSymbolIsError();
 				}
 				if(laSymbol.token == Symbol.Token.ASSIGN){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'=\' inserted.");
 				}
 				parseExpression();
 				if(laSymbol.token == Symbol.Token.COMMA){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \',\' inserted.");
 				}
 				parseExpression();
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \':\' inserted.");
 					nextSymbolIsError();
 				}
 				parseExpression();
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'end\' inserted.");
 					nextSymbol();
 				}
 				break;
@@ -638,14 +624,12 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \':\' inserted.");
 					nextSymbolIsError();
 				}
 				parseExpression();
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'end\' inserted.");
 					nextSymbolIsError();
 				}
 				break;
@@ -663,7 +647,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \')\' inserted.");
 					nextSymbolIsError();
 				}
 				break;
@@ -720,7 +703,6 @@ public class SynAn extends Phase {
 			case END:
 				break;
 			default:
-				System.out.println(laSymbol.token);
 				throw new InternalCompilerError();
 		}
 		endLog();
@@ -750,13 +732,11 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
 					nextSymbol();
 				}else{
-					Report.warning("Missing identifier inserted.");
 					nextSymbolIsError();
 				}
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \':\' inserted.");
 					nextSymbolIsError();
 				}
 				parseType();
@@ -774,26 +754,22 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
 					nextSymbol();
 				}else{
-					Report.warning("Missing identifier inserted.");
 					nextSymbolIsError();
 				}
 				if(laSymbol.token == Symbol.Token.OPENING_PARENTHESIS){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'(\' inserted.");
 					nextSymbolIsError();
 				}
 				parseParametersOpt();
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \')\' inserted.");
 					nextSymbolIsError();
 				}
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \':\' inserted.");
 					nextSymbolIsError();
 				}
 				parseType();
@@ -843,7 +819,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \':\' inserted.");
 					nextSymbolIsError();
 				}
 				parseType();
@@ -880,13 +855,11 @@ public class SynAn extends Phase {
 			if (laSymbol.token == Symbol.Token.IDENTIFIER) {
 				symId = nextSymbol();
 			} else {
-				Report.warning(laSymbol, "Missing identifier inserted.");
 				symId = nextSymbolIsError();
 			}
 			if (laSymbol.token == Symbol.Token.COLON) {
 				nextSymbol();
 			} else {
-				Report.warning(laSymbol, "Missing symbol ':' inserted.");
 				nextSymbolIsError();
 			}
 			parseType();
@@ -914,14 +887,12 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.OPENING_BRACKET){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'[\' inserted.");
 					nextSymbolIsError();
 				}
 				parseExpression();
 				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \']\' inserted.");
 					nextSymbolIsError();
 				}
 				parseType();
@@ -931,14 +902,12 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.OPENING_BRACE){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'{\' inserted.");
 					nextSymbolIsError();
 				}
 				parseComponents();
 				if(laSymbol.token == Symbol.Token.CLOSING_BRACE){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \'}\' inserted.");
 					nextSymbolIsError();
 				}
 				break;
@@ -960,7 +929,8 @@ public class SynAn extends Phase {
 	private void parseComponents_() throws IOException{
 		begLog("Components'");
 		switch(laSymbol.token){
-			case IDENTIFIER:
+			case COMMA:
+				nextSymbol();
 				parseComponent();
 				parseComponents_();
 				break;
@@ -979,7 +949,6 @@ public class SynAn extends Phase {
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
-					Report.warning("Missing \':\' inserted.");
 					nextSymbolIsError();
 				}
 				parseType();

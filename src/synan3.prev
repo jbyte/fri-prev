@@ -1,0 +1,11 @@
+while a=="test\nstring":
+	if c!='c' then
+		713 . id
+	else
+		null
+	end
+end
+where
+	var tmp:rec{x:integer,y:boolean,z:char}
+	var a:string
+end
