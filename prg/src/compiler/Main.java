@@ -5,6 +5,7 @@ import java.io.IOException;
 import compiler.common.report.*;
 import compiler.phase.lexan.*;
 import compiler.phase.synan.*;
+import compiler.phase.abstr.*;
 
 /**
  * The compiler's entry point.
@@ -42,9 +43,15 @@ public class Main {
 				
 				// ***** Syntax analysis. *****
 				SynAn synAn = new SynAn(task);
-				synAn.synAn();
+				task.prgAST = synAn.synAn();
 				synAn.close();
 				if (task.phase.equals("synan"))
+					break;
+
+				// ***** Abstract syntax tree. *****
+				Abstr abstr = new Abstr(task);
+				abstr.close();
+				if (task.phase.equals("abstr"))
 					break;
 
 				break;
