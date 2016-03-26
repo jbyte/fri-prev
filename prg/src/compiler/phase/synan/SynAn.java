@@ -10,6 +10,7 @@ import compiler.common.logger.*;
 import compiler.common.report.*;
 import compiler.phase.*;
 import compiler.phase.lexan.*;
+import compiler.data.ast.*;
 
 /**
  * The syntax analyzer.
@@ -28,9 +29,9 @@ public class SynAn extends Phase {
 	 *            The lexical analyzer.
 	 */
 	public SynAn(Task task) {
-		super(task, "synan");
+		super(task, "abstr");
 		this.lexAn = new LexAn(task);
-		this.logger.setTransformer(//
+		this.logger.setTransformer(
 				new Transformer() {
 					// This transformer produces the
 					// left-most derivation.
@@ -48,6 +49,7 @@ public class SynAn extends Phase {
 					}
 
 					private void leftMostDer(Node node) {
+						System.out.println("in leftMostDer");
 						if (((Element) node).getTagName().equals("nont")) {
 							String nodeName = nodeName(node);
 							NodeList children = node.getChildNodes();
@@ -142,41 +144,47 @@ public class SynAn extends Phase {
 	 * 
 	 * This method performs the syntax analysis of the source file.
 	 */
-	public void synAn() throws IOException{
+	public Program synAn() throws IOException{
 		laSymbol = lexAn.lexAn();
-		parseProgram();
+		Program prog = parseProgram();
 		if (laSymbol.token != Symbol.Token.EOF)
 			Report.warning(laSymbol, "Unexpected symbol(s) at the end of file.");
+
+		return prog;
 	}
 
 	// All these methods are a part of a recursive descent implementation of an
 	// LL(1) parser.
 
-	private void parseProgram()  throws IOException{
+	private Program parseProgram()  throws IOException{
+		Symbol tmp = laSymbol;
 		begLog("Program");
-		parseExpression();
+		Expr expr = parseExpression();
 		endLog();
+		return new Program(new Position(tmp,laSymbol),expr);
 	}
 
-	private void parseExpression() throws IOException{
+	private Expr parseExpression() throws IOException{
 		begLog("Expression");
-		parseAssignmentExpression();
-		parseExpression_();
+		Expr expr = parseAssignmentExpression();
+		expr = parseExpression_(expr);
 		endLog();
+		return expr;
 	}
 
-	private void parseExpression_() throws IOException{
+	private Expr parseExpression_(Expr expr) throws IOException{
 		begLog("Expression'");
 		switch(laSymbol.token){
 			case WHERE:
-				nextSymbol();
-				parseDeclarations();
+				Symbol tmp = nextSymbol();
+				LinkedList<Decl> decls = parseDeclarations();
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parseExpression_();
+				expr = new WhereExpr(new Position(tmp,laSymbol),expr,decls);
+				expr = parseExpression_(expr);
 				break;
 			case END:
 			case COMMA:
@@ -194,20 +202,32 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseExpressions() throws IOException{
+	private Expr parseExpressions() throws IOException{
 		begLog("Expressions");
-		parseExpression();
-		parseExpressions_();
+		Expr expr = parseExpression();
+		expr = parseExpressions_(expr);
 		endLog();
+		return expr;
 	}
-	private void parseExpressions_() throws IOException{
+	private Expr parseExpressions_(Expr expr) throws IOException{
 		begLog("Expressions'");
 		switch(laSymbol.token){
 			case COMMA:
-				nextSymbol();
-				parseExpression();
-				parseExpressions_();
+				LinkedList<Expr> exprs = new LinkedList<Expr>();
+				if(expr instanceof Exprs){
+					for(int i=0; i<((Exprs)expr).numExprs(); i++){
+						exprs.add(((Exprs)expr).expr(i));
+					}
+				}else{
+					exprs.add(expr);
+				}
+				Symbol tmp = nextSymbol();
+				expr = parseExpression();
+				exprs.add(expr);
+				Expr list = new Exprs(new Position(tmp,laSymbol),exprs);
+				expr = parseExpressions_(list);
 				break;
 			case CLOSING_PARENTHESIS:
 				break;
@@ -215,20 +235,23 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseAssignmentExpression() throws IOException{
+	private Expr parseAssignmentExpression() throws IOException{
 		begLog("AssignmentExpression");
-		parseDisjunctiveExpression();
-		parseAssignmentExpression_();
+		Expr expr = parseDisjunctiveExpression();
+		expr = parseAssignmentExpression_(expr);
 		endLog();
+		return expr;
 	}
-	private void parseAssignmentExpression_() throws IOException{
+	private Expr parseAssignmentExpression_(Expr expr) throws IOException{
 		begLog("AssignmentExpression'");
 		switch(laSymbol.token){
 			case ASSIGN:
-				nextSymbol();
-				parseDisjunctiveExpression();
-				parseAssignmentExpression_();
+				Symbol tmp = nextSymbol();
+				Expr exprR = parseDisjunctiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.ASSIGN,expr,exprR);
+				expr = parseAssignmentExpression_(expr);
 				break;
 			case WHERE:
 			case END:
@@ -247,20 +270,23 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseDisjunctiveExpression() throws IOException{
+	private Expr parseDisjunctiveExpression() throws IOException{
 		begLog("DisjunctiveExpression");
-		parseConjunctiveExpression();
-		parseDisjunctiveExpression_();
+		Expr expr = parseConjunctiveExpression();
+		expr = parseDisjunctiveExpression_(expr);
 		endLog();
+		return expr;
 	}
-	private void parseDisjunctiveExpression_() throws IOException{
+	private Expr parseDisjunctiveExpression_(Expr expr) throws IOException{
 		begLog("DisjunctiveExpression'");
 		switch(laSymbol.token){
 			case OR:
-				nextSymbol();
-				parseConjunctiveExpression();
-				parseDisjunctiveExpression_();
+				Symbol tmp = nextSymbol();
+				Expr exprR = parseConjunctiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.OR,expr,exprR);
+				expr = parseDisjunctiveExpression_(expr);
 				break;
 			case WHERE:
 			case END:
@@ -280,20 +306,23 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseConjunctiveExpression() throws IOException{
+	private Expr parseConjunctiveExpression() throws IOException{
 		begLog("ConjunctiveExpression");
-		parseRelationalExpression();
-		parseConjunctiveExpression_();
+		Expr expr = parseRelationalExpression();
+		expr = parseConjunctiveExpression_(expr);
 		endLog();
+		return expr;
 	}
-	private void parseConjunctiveExpression_() throws IOException{
+	private Expr parseConjunctiveExpression_(Expr expr) throws IOException{
 		begLog("ConjunctiveExpression'");
 		switch(laSymbol.token){
 			case AND:
-				nextSymbol();
-				parseRelationalExpression();
-				parseConjunctiveExpression_();
+				Symbol tmp = nextSymbol();
+				Expr exprR = parseRelationalExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.AND,expr,exprR);
+				expr = parseConjunctiveExpression_(expr);
 				break;
 			case WHERE:
 			case END:
@@ -314,25 +343,55 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseRelationalExpression() throws IOException{
+	private Expr parseRelationalExpression() throws IOException{
 		begLog("RelationalExpression");
-		parseAdditiveExpression();
-		parseRelationalExpression_();
+		Expr expr = parseAdditiveExpression();
+		expr = parseRelationalExpression_(expr);
 		endLog();
+		return expr;
 	}
-	private void parseRelationalExpression_() throws IOException{
+	private Expr parseRelationalExpression_(Expr expr) throws IOException{
 		begLog("RelationalExpression'");
+		Expr exprR;
+		Symbol tmp;
 		switch(laSymbol.token){
 			case EQU:
+				tmp = nextSymbol();
+				exprR = parseAdditiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.EQU,expr,exprR);
+				expr = parseRelationalExpression_(expr);
+				break;
 			case NEQ:
+				tmp = nextSymbol();
+				exprR = parseAdditiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.NEQ,expr,exprR);
+				expr = parseRelationalExpression_(expr);
+				break;
 			case LTH:
+				tmp = nextSymbol();
+				exprR = parseAdditiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.LTH,expr,exprR);
+				expr = parseRelationalExpression_(expr);
+				break;
 			case GTH:
+				tmp = nextSymbol();
+				exprR = parseAdditiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.GTH,expr,exprR);
+				expr = parseRelationalExpression_(expr);
+				break;
 			case LEQ:
+				tmp = nextSymbol();
+				exprR = parseAdditiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.LEQ,expr,exprR);
+				expr = parseRelationalExpression_(expr);
+				break;
 			case GEQ:
-				nextSymbol();
-				parseAdditiveExpression();
-				parseRelationalExpression_();
+				tmp = nextSymbol();
+				exprR = parseAdditiveExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.GEQ,expr,exprR);
+				expr = parseRelationalExpression_(expr);
 				break;
 			case WHERE:
 			case END:
@@ -354,21 +413,31 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseAdditiveExpression() throws IOException{
+	private Expr parseAdditiveExpression() throws IOException{
 		begLog("AdditiveExpression");
-		parseMultiplicativeExpression();
-		parseAdditiveExpression_();
+		Expr expr = parseMultiplicativeExpression();
+		expr = parseAdditiveExpression_(expr);
 		endLog();
+		return expr;
 	}
-	private void parseAdditiveExpression_() throws IOException{
+	private Expr parseAdditiveExpression_(Expr expr) throws IOException{
 		begLog("AdditiveExpression'");
+		Expr exprR;
+		Symbol tmp;
 		switch(laSymbol.token){
 			case ADD:
+				tmp = nextSymbol();
+				exprR = parseMultiplicativeExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.ADD,expr,exprR);
+				expr = parseAdditiveExpression_(expr);
+				break;
 			case SUB:
-				nextSymbol();
-				parseMultiplicativeExpression();
-				parseAdditiveExpression_();
+				tmp = nextSymbol();
+				exprR = parseMultiplicativeExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.SUB,expr,exprR);
+				expr = parseAdditiveExpression_(expr);
 				break;
 			case WHERE:
 			case END:
@@ -396,22 +465,37 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseMultiplicativeExpression() throws IOException{
+	private Expr parseMultiplicativeExpression() throws IOException{
 		begLog("MultiplicativeExpression");
-		parsePrefixExpression();
-		parseMultiplicativeExpression_();
+		Expr expr = parsePrefixExpression();
+		expr = parseMultiplicativeExpression_(expr);
 		endLog();
+		return expr;
 	}
-	private void parseMultiplicativeExpression_() throws IOException{
+	private Expr parseMultiplicativeExpression_(Expr expr) throws IOException{
 		begLog("MultiplicativeExperssion'");
+		Expr exprR;
+		Symbol tmp;
 		switch(laSymbol.token){
 			case MUL:
+				tmp = nextSymbol();
+				exprR = parsePrefixExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.MUL,expr,exprR);
+				expr = parseMultiplicativeExpression_(expr);
+				break;
 			case DIV:
+				tmp = nextSymbol();
+				exprR = parsePrefixExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.DIV,expr,exprR);
+				expr = parseMultiplicativeExpression_(expr);
+				break;
 			case MOD:
-				nextSymbol();
-				parsePrefixExpression();
-				parseMultiplicativeExpression_();
+				tmp = nextSymbol();
+				exprR = parsePrefixExpression();
+				expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.MOD,expr,exprR);
+				expr = parseMultiplicativeExpression_(expr);
 				break;
 			case WHERE:
 			case END:
@@ -441,26 +525,43 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parsePrefixExpression() throws IOException{
+	private Expr parsePrefixExpression() throws IOException{
 		begLog("PrefixExpression");
+		Expr expr;
+		Symbol tmp;
 		switch(laSymbol.token){
 			case ADD:
+				tmp = nextSymbol();
+				expr = parsePrefixExpression();
+				expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.ADD,expr);
+				break;
 			case SUB:
+				tmp = nextSymbol();
+				expr = parsePrefixExpression();
+				expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.SUB,expr);
+				break;
 			case NOT:
+				tmp = nextSymbol();
+				expr = parsePrefixExpression();
+				expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.NOT,expr);
+				break;
 			case MEM:
-				nextSymbol();
-				parsePrefixExpression();
+				tmp = nextSymbol();
+				expr = parsePrefixExpression();
+				expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.MEM,expr);
 				break;
 			case OPENING_BRACKET:
-				nextSymbol();
-				parseType();
+				tmp = nextSymbol();
+				Type type = parseType();
 				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parsePrefixExpression();
+				expr = parsePrefixExpression();
+				expr = new CastExpr(new Position(tmp,laSymbol),type,expr);
 				break;
 			case IDENTIFIER:
 			case CONST_INTEGER:
@@ -473,44 +574,53 @@ public class SynAn extends Phase {
 			case IF:
 			case FOR:
 			case WHILE:
-				parsePostfixExpression();
+				expr = parsePostfixExpression();
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parsePostfixExpression() throws IOException{
+	private Expr parsePostfixExpression() throws IOException{
 		begLog("PostfixExpression");
-		parseAtomicExpression();
-		parsePostfixExpression_();
+		Expr expr = parseAtomicExpression();
+		expr = parsePostfixExpression_(expr);
 		endLog();
+		return expr;
 	}
-	private void parsePostfixExpression_() throws IOException{
+	private Expr parsePostfixExpression_(Expr expr) throws IOException{
 		begLog("PostfixExpression'");
+		Expr exprR;
+		Symbol temp;
 		switch(laSymbol.token){
 			case OPENING_BRACKET:
-				nextSymbol();
-				parseExpression();
+				temp = nextSymbol();
+				exprR = parseExpression();
 				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parsePostfixExpression_();
+				expr = new BinExpr(new Position(temp,laSymbol),BinExpr.Oper.ARR,expr,exprR);
+				expr = parsePostfixExpression_(expr);
 				break;
 			case DOT:
-				nextSymbol();
+				temp = nextSymbol();
+				Symbol tmp = null;
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
+					tmp = laSymbol;
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parsePostfixExpression_();
+				expr = new BinExpr(new Position(temp,laSymbol),BinExpr.Oper.REC,expr,new CompName(tmp,tmp.lexeme));
+				expr = parsePostfixExpression_(expr);
 				break;
 			case VAL:
-				nextSymbol();
-				parsePostfixExpression_();
+				temp = nextSymbol();
+				expr = new UnExpr(new Position(temp,laSymbol),UnExpr.Oper.VAL,expr);
+				expr = parsePostfixExpression_(expr);
 				break;
 			case WHERE:
 			case END:
@@ -543,25 +653,51 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseAtomicExpression() throws IOException{
+	private Expr parseAtomicExpression() throws IOException{
 		begLog("AtomicExpression");
+		Expr expr;
+		Symbol sym;
 		switch(laSymbol.token){
 			case CONST_INTEGER:
+				sym = nextSymbol();
+				expr = new AtomExpr(sym,AtomExpr.AtomTypes.INTEGER,sym.lexeme);
+				break;
 			case CONST_BOOLEAN:
+				sym = nextSymbol();
+				expr = new AtomExpr(sym,AtomExpr.AtomTypes.BOOLEAN,sym.lexeme);
+				break;
 			case CONST_CHAR:
+				sym = nextSymbol();
+				expr = new AtomExpr(sym,AtomExpr.AtomTypes.CHAR,sym.lexeme);
+				break;
 			case CONST_STRING:
+				sym = nextSymbol();
+				expr = new AtomExpr(sym,AtomExpr.AtomTypes.STRING,sym.lexeme);
+				break;
 			case CONST_NULL:
+				sym = nextSymbol();
+				expr = new AtomExpr(sym,AtomExpr.AtomTypes.PTR,sym.lexeme);
+				break;
 			case CONST_NONE:
-				nextSymbol();
+				sym = nextSymbol();
+				expr = new AtomExpr(sym,AtomExpr.AtomTypes.VOID,sym.lexeme);
 				break;
 			case IDENTIFIER:
-				nextSymbol();
-				parseArgumentsOpt();
+				sym = nextSymbol();
+				expr = parseArgumentsOpt();
+				LinkedList<Expr> list = new LinkedList<Expr>();
+				if(expr instanceof Exprs){
+					for(int i=0; i<((Exprs)expr).numExprs(); i++){
+						list.add(((Exprs)expr).expr(i));
+					}
+					expr = new FunCall(new Position(sym,laSymbol),sym.lexeme,list);
+				}else expr = new VarName(sym,sym.lexeme);
 				break;
 			case OPENING_PARENTHESIS:
-				nextSymbol();
-				parseExpressions();
+				sym = nextSymbol();
+				expr = parseExpressions();
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
@@ -569,30 +705,31 @@ public class SynAn extends Phase {
 				}
 				break;
 			case IF:
-				nextSymbol();
-				parseExpression();
+				sym = nextSymbol();
+				expr = parseExpression();
 				if(laSymbol.token == Symbol.Token.THEN){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parseExpression();
+				Expr thenExpr = parseExpression();
 				if(laSymbol.token == Symbol.Token.ELSE){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parseExpression();
+				Expr elseExpr = parseExpression();
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
+				expr = new IfExpr(new Position(sym,laSymbol),expr,thenExpr,elseExpr);
 				break;
 			case FOR:
-				nextSymbol();
+				sym = nextSymbol();
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
-					nextSymbol();
+					sym = nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
@@ -600,50 +737,54 @@ public class SynAn extends Phase {
 					nextSymbol();
 				}else{
 				}
-				parseExpression();
+				expr = parseExpression();
 				if(laSymbol.token == Symbol.Token.COMMA){
 					nextSymbol();
 				}else{
 				}
-				parseExpression();
+				Expr hi = parseExpression();
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parseExpression();
+				Expr body = parseExpression();
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
 					nextSymbol();
 				}
+				expr = new ForExpr(new Position(sym,laSymbol),new VarName(sym,sym.lexeme),expr,hi,body);
 				break;
 			case WHILE:
-				nextSymbol();
-				parseExpression();
+				sym = nextSymbol();
+				expr = parseExpression();
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parseExpression();
+				body = parseExpression();
 				if(laSymbol.token == Symbol.Token.END){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
+				expr = new WhileExpr(new Position(sym,laSymbol),expr,body);
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseArgumentsOpt() throws IOException{
+	private Expr parseArgumentsOpt() throws IOException{
 		begLog("ArgumentsOpt");
+		Expr expr = null;
 		switch(laSymbol.token){
 			case OPENING_PARENTHESIS:
 				nextSymbol();
-				parseExpressions();
+				expr = parseExpressions();
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
@@ -684,21 +825,26 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
-	private void parseDeclarations() throws IOException{
+	private LinkedList<Decl> parseDeclarations() throws IOException{
 		begLog("Declarations");
-		parseDeclaration();
-		parseDeclarations_();
+		Decl decl = parseDeclaration();
+		LinkedList<Decl> decls = new LinkedList<Decl>();
+		decls.add(decl);
+		decls = parseDeclarations_(decls);
 		endLog();
+		return decls;
 	}
-	private void parseDeclarations_() throws IOException{
+	private LinkedList<Decl> parseDeclarations_(LinkedList<Decl> decls) throws IOException{
 		begLog("Declarations'");
 		switch(laSymbol.token){
 			case TYP:
 			case FUN:
 			case VAR:
-				parseDeclaration();
-				parseDeclarations_();
+				Decl decl = parseDeclaration();
+				decls.add(decl);
+				decls = parseDeclarations_(decls);
 				break;
 			case END:
 				break;
@@ -706,31 +852,37 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return decls;
 	}
-	private void parseDeclaration() throws IOException{
+	private Decl parseDeclaration() throws IOException{
 		begLog("Declaration");
+		Decl decl;
 		switch(laSymbol.token){
 			case TYP:
-				parseTypeDeclaration();
+				decl = parseTypeDeclaration();
 				break;
 			case FUN:
-				parseFunctionDeclaration();
+				decl = parseFunctionDeclaration();
 				break;
 			case VAR:
-				parseVariableDeclaration();
+				decl = parseVariableDeclaration();
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return decl;
 	}
-	private void parseTypeDeclaration() throws IOException{
+	private Decl parseTypeDeclaration() throws IOException{
 		begLog("TypeDeclaration");
+		Decl decl;
+		Symbol tmp;
 		switch(laSymbol.token){
 			case TYP:
-				nextSymbol();
+				tmp = nextSymbol();
+				Symbol sym = tmp;
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
-					nextSymbol();
+					sym = nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
@@ -739,20 +891,25 @@ public class SynAn extends Phase {
 				}else{
 					nextSymbolIsError();
 				}
-				parseType();
+				Type type = parseType();
+				decl = new TypeDecl(new Position(tmp,laSymbol),sym.lexeme,type);
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return decl;
 	}
-	private void parseFunctionDeclaration() throws IOException{
+	private Decl parseFunctionDeclaration() throws IOException{
 		begLog("FunctionDeclaration");
+		Decl decl;
+		Symbol tmp;
 		switch(laSymbol.token){
 			case FUN:
-				nextSymbol();
+				tmp = nextSymbol();
+				Symbol sym = tmp;
 				if(laSymbol.token == Symbol.Token.IDENTIFIER){
-					nextSymbol();
+					sym = nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
@@ -761,7 +918,7 @@ public class SynAn extends Phase {
 				}else{
 					nextSymbolIsError();
 				}
-				parseParametersOpt();
+				LinkedList<ParDecl> list = parseParametersOpt();
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
@@ -772,68 +929,82 @@ public class SynAn extends Phase {
 				}else{
 					nextSymbolIsError();
 				}
-				parseType();
-				parseFunctionBodyOpt();
+				Type type = parseType();
+				Expr expr = parseFunctionBodyOpt();
+				if(expr==null) decl = new FunDecl(new Position(tmp,laSymbol),sym.lexeme,list,type);
+				else decl = new FunDef(new Position(tmp,laSymbol),sym.lexeme,list,type,expr);
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return decl;
 	}
-	private void parseParametersOpt() throws IOException{
+	private LinkedList<ParDecl> parseParametersOpt() throws IOException{
 		begLog("ParametersOpt");
+		LinkedList<ParDecl> list = new LinkedList<ParDecl>();
 		switch(laSymbol.token){
 			case IDENTIFIER:
-				parseParameters();
+				list = parseParameters();
 			case CLOSING_PARENTHESIS:
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return list;
 	}
-	private void parseParameters() throws IOException{
+	private LinkedList<ParDecl> parseParameters() throws IOException{
 		begLog("Parameters");
-		parseParameter();
-		parseParameters_();
+		ParDecl param = parseParameter();
+		LinkedList<ParDecl> params = new LinkedList<ParDecl>();
+		params.add(param);
+		params = parseParameters_(params);
 		endLog();
+		return params;
 	}
-	private void parseParameters_() throws IOException{
+	private LinkedList<ParDecl> parseParameters_(LinkedList<ParDecl> list) throws IOException{
 		begLog("Parameters'");	
 		switch(laSymbol.token){
 			case IDENTIFIER:
-				parseParameter();
-				parseParameters_();
+				ParDecl param = parseParameter();
+				list.add(param);
+				list = parseParameters_(list);
 			case CLOSING_PARENTHESIS:
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return list;
 	}
-	private void parseParameter() throws IOException{
+	private ParDecl parseParameter() throws IOException{
 		begLog("Parameter");
+		ParDecl param;
 		switch(laSymbol.token){
 			case IDENTIFIER:
-				nextSymbol();
+				Symbol sym = nextSymbol();
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parseType();
+				Type type = parseType();
+				param = new ParDecl(new Position(sym,laSymbol),sym.lexeme,type);
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return param;
 	}
-	private void parseFunctionBodyOpt() throws IOException{
+	private Expr parseFunctionBodyOpt() throws IOException{
 		begLog("FunctionBodyOpt");
+		Expr expr = null;
 		switch(laSymbol.token){
 			case ASSIGN:
 				nextSymbol();
-				parseExpression();
+				expr = parseExpression();
 				break;
 			case TYP:
 			case FUN:
@@ -844,95 +1015,124 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return expr;
 	}
 	
-	private void parseVariableDeclaration() throws IOException{
+	private Decl parseVariableDeclaration() throws IOException{
 		begLog("VariableDeclaration");
+		Decl decl;
 		switch (laSymbol.token) {
-		case VAR: {
-			Symbol symVar = nextSymbol();
-			Symbol symId;
-			if (laSymbol.token == Symbol.Token.IDENTIFIER) {
-				symId = nextSymbol();
-			} else {
-				symId = nextSymbolIsError();
-			}
-			if (laSymbol.token == Symbol.Token.COLON) {
-				nextSymbol();
-			} else {
-				nextSymbolIsError();
-			}
-			parseType();
-			break;
-		}
-		default:
-			throw new InternalCompilerError();
-		}
-		endLog();
-	}
-	
-	private void parseType() throws IOException{
-		begLog("Type");
-		switch(laSymbol.token){
-			case INTEGER:
-			case BOOLEAN:
-			case CHAR:
-			case STRING:
-			case VOID:
-			case IDENTIFIER:
-				nextSymbol();
-				break;
-			case ARR:
-				nextSymbol();
-				if(laSymbol.token == Symbol.Token.OPENING_BRACKET){
+			case VAR:
+				Symbol symVar = nextSymbol();
+				Symbol symId;
+				if (laSymbol.token == Symbol.Token.IDENTIFIER) {
+					symId = nextSymbol();
+				} else {
+					symId = nextSymbolIsError();
+				}
+				if (laSymbol.token == Symbol.Token.COLON) {
 					nextSymbol();
-				}else{
+				} else {
 					nextSymbolIsError();
 				}
-				parseExpression();
-				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
-					nextSymbol();
-				}else{
-					nextSymbolIsError();
-				}
-				parseType();
-				break;
-			case REC:
-				nextSymbol();
-				if(laSymbol.token == Symbol.Token.OPENING_BRACE){
-					nextSymbol();
-				}else{
-					nextSymbolIsError();
-				}
-				parseComponents();
-				if(laSymbol.token == Symbol.Token.CLOSING_BRACE){
-					nextSymbol();
-				}else{
-					nextSymbolIsError();
-				}
-				break;
-			case PTR:
-				nextSymbol();
-				parseType();
+				Type type = parseType();
+				decl = new VarDecl(new Position(symVar,laSymbol),symId.lexeme,type);
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return decl;
 	}
-	private void parseComponents() throws IOException{
-		begLog("Components");
-		parseComponent();
-		parseComponents_();
+	
+	private Type parseType() throws IOException{
+		begLog("Type");
+		Type type;
+		Symbol sym;
+		switch(laSymbol.token){
+			case INTEGER:
+				sym = nextSymbol();
+				type = new AtomType(sym,AtomType.AtomTypes.INTEGER);
+				break;
+			case BOOLEAN:
+				sym = nextSymbol();
+				type = new AtomType(sym,AtomType.AtomTypes.BOOLEAN);
+				break;
+			case CHAR:
+				sym = nextSymbol();
+				type = new AtomType(sym,AtomType.AtomTypes.CHAR);
+				break;
+			case STRING:
+				sym = nextSymbol();
+				type = new AtomType(sym,AtomType.AtomTypes.STRING);
+				break;
+			case VOID:
+				sym = nextSymbol();
+				type = new AtomType(sym,AtomType.AtomTypes.VOID);
+				break;
+			case IDENTIFIER:
+				sym = nextSymbol();
+				type = new TypeName(sym,sym.lexeme);
+				break;
+			case ARR:
+				sym = nextSymbol();
+				if(laSymbol.token == Symbol.Token.OPENING_BRACKET){
+					nextSymbol();
+				}else{
+					nextSymbolIsError();
+				}
+				Expr expr = parseExpression();
+				if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
+					nextSymbol();
+				}else{
+					nextSymbolIsError();
+				}
+				type = parseType();
+				type = new ArrType(new Position(sym,laSymbol),expr,type);
+				break;
+			case REC:
+				sym = nextSymbol();
+				if(laSymbol.token == Symbol.Token.OPENING_BRACE){
+					nextSymbol();
+				}else{
+					nextSymbolIsError();
+				}
+				LinkedList<CompDecl> list = parseComponents();
+				if(laSymbol.token == Symbol.Token.CLOSING_BRACE){
+					nextSymbol();
+				}else{
+					nextSymbolIsError();
+				}
+				type = new RecType(new Position(sym,laSymbol),list);
+				break;
+			case PTR:
+				sym = nextSymbol();
+				type = parseType();
+				type = new PtrType(new Position(sym,laSymbol),type);
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
 		endLog();
+		return type;
 	}
-	private void parseComponents_() throws IOException{
+	private LinkedList<CompDecl> parseComponents() throws IOException{
+		begLog("Components");
+		CompDecl comp = parseComponent();
+		LinkedList<CompDecl> comps = new LinkedList<CompDecl>();
+		comps.add(comp);
+		comps = parseComponents_(comps);
+		endLog();
+		return comps;
+	}
+	private LinkedList<CompDecl> parseComponents_(LinkedList<CompDecl> list) throws IOException{
 		begLog("Components'");
 		switch(laSymbol.token){
 			case COMMA:
 				nextSymbol();
-				parseComponent();
-				parseComponents_();
+				CompDecl comp = parseComponent();
+				list.add(comp);
+				list = parseComponents_(list);
 				break;
 			case CLOSING_BRACE:
 				break;
@@ -940,23 +1140,27 @@ public class SynAn extends Phase {
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return list;
 	}
-	private void parseComponent() throws IOException{
+	private CompDecl parseComponent() throws IOException{
 		begLog("Component");
+		CompDecl comp;
 		switch(laSymbol.token){
 			case IDENTIFIER:
-				nextSymbol();
+				Symbol sym = nextSymbol();
 				if(laSymbol.token == Symbol.Token.COLON){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
-				parseType();
+				Type type = parseType();
+				comp = new CompDecl(new Position(sym,laSymbol),sym.lexeme,type);
 				break;
 			default:
 				throw new InternalCompilerError();
 		}
 		endLog();
+		return comp;
 	}
 
 
