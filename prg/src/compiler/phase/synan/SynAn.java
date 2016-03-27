@@ -688,10 +688,12 @@ public class SynAn extends Phase {
 				sym = nextSymbol();
 				expr = parseArgumentsOpt();
 				LinkedList<Expr> list = new LinkedList<Expr>();
-				if(expr instanceof Exprs){
-					for(int i=0; i<((Exprs)expr).numExprs(); i++){
-						list.add(((Exprs)expr).expr(i));
-					}
+				if(expr!=null){
+					if(expr instanceof Exprs){
+						for(int i=0; i<((Exprs)expr).numExprs(); i++){
+							list.add(((Exprs)expr).expr(i));
+						}
+					}else list.add(expr);
 					expr = new FunCall(new Position(sym,laSymbol),sym.lexeme,list);
 				}else expr = new VarName(sym,sym.lexeme);
 				break;
