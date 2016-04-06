@@ -118,7 +118,12 @@ AtomExpr ->
 	
 ArgsOpt ->
 	 #
-	| OPENING_PARANTHESIS Expr CLOSING_PARANTHESIS
+	| OPENING_PARANTHESIS ArgsOpt' CLOSING_PARANTHESIS
+	.
+
+ArgsOpt' ->
+	 #
+	| Exprs
 	.
 	
 Decs ->
@@ -192,6 +197,6 @@ Comps' ->
 	| Comp Comps'
 	.
 	
-Comp
+Comp ->
 	 IDENTIFIER COLON Type
 	.

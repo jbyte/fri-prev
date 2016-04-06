@@ -786,12 +786,14 @@ public class SynAn extends Phase {
 		switch(laSymbol.token){
 			case OPENING_PARENTHESIS:
 				nextSymbol();
-				expr = parseExpressions();
+				expr = parseArgumentsOpt_();
 				if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
 					nextSymbol();
 				}else{
 					nextSymbolIsError();
 				}
+				if(expr==null)
+					expr = new Exprs(new Position(laSymbol),new LinkedList<Expr>());
 				break;
 			case WHERE:
 			case END:
@@ -828,6 +830,37 @@ public class SynAn extends Phase {
 		}
 		endLog();
 		return expr;
+	}
+	private Expr parseArgumentsOpt_() throws IOException{
+		begLog("ArgimentsOpt'");
+		Expr expr = null;
+		switch(laSymbol.token){
+			case ADD:
+			case SUB:
+			case NOT:
+			case MEM:
+			case OPENING_BRACKET:
+			case IDENTIFIER:
+			case CONST_INTEGER:
+			case CONST_BOOLEAN:
+			case CONST_CHAR:
+			case CONST_STRING:
+			case CONST_NULL:
+			case CONST_NONE:
+			case OPENING_PARENTHESIS:
+			case IF:
+			case FOR:
+			case WHILE:
+				expr = parseExpressions();
+				break;
+			case CLOSING_PARENTHESIS:
+				break;
+			default:
+				throw new InternalCompilerError();
+		}
+		endLog();
+		return expr;
+		
 	}
 	private LinkedList<Decl> parseDeclarations() throws IOException{
 		begLog("Declarations");

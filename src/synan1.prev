@@ -1,1 +1,1 @@
-(a & b | a*(b-a)) where var a:integer var b:integer end
+(a & b | a*(b-a),foo(a+b)) where var a:integer var b:integer fun foo(x:integer):integer end
