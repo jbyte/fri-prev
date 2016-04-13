@@ -2,6 +2,7 @@ package compiler;
 
 import compiler.common.report.*;
 import compiler.data.ast.*;
+import compiler.data.ast.attr.*;
 
 /**
  * The parameters of the compilation process.
@@ -20,7 +21,7 @@ public class Task {
 	public final String xslDName;
 
 	/** A regular expression describing all phases of the compiler. */
-	private static final String allPhases = "(lexan|synan|abstr)";
+	private static final String allPhases = "(lexan|synan|abstr|seman)";
 
 	/** A list of phases logging should be performed for. */
 	public final String loggedPhases;
@@ -98,6 +99,7 @@ public class Task {
 			throw new CompilerError("Source file name not specified.");
 	}
 
+ 	public Attributes prgAttrs = new Attributes();
 	public Program prgAST = null;
 
 }
