@@ -23,11 +23,66 @@ import compiler.data.ast.code.*;
  */
 public class EvalValue extends FullVisitor {
 
-	private final Attributes attrs;
-	
-	public EvalValue(Attributes attrs) {
-		this.attrs = attrs;
-	}
-	
-	// TODO
+    private final Attributes attrs;
+    
+    public EvalValue(Attributes attrs) {
+        this.attrs = attrs;
+    }
+    
+    @Override
+    public void visit(AtomExpr atomExpr){
+        if(atomExpr.type == AtomExpr.AtomTypes.INTEGER){
+            attrs.valueAttr.set(atomExpr,Long.parseLong(atomExpr.value));
+        }
+    }
+
+    @Override
+    public void visit(BinExpr binExpr){
+        binExpr.fstExpr.accept(this);
+        binExpr.sndExpr.accept(this);
+        switch(binExpr.oper){
+            case ADD:
+                if(attrs.valueAttr.get(binExpr.fstExpr)!=null && attrs.valueAttr.get(binExpr.sndExpr)!=null){
+                    attrs.valueAttr.set(binExpr,attrs.valueAttr.get(binExpr.fstExpr)+attrs.valueAttr.get(binExpr.sndExpr));
+                }
+                break;
+            case SUB:
+                if(attrs.valueAttr.get(binExpr.fstExpr)!=null && attrs.valueAttr.get(binExpr.sndExpr)!=null){
+                    attrs.valueAttr.set(binExpr,attrs.valueAttr.get(binExpr.fstExpr)-attrs.valueAttr.get(binExpr.sndExpr));
+                }
+                break;
+            case MUL:
+                if(attrs.valueAttr.get(binExpr.fstExpr)!=null && attrs.valueAttr.get(binExpr.sndExpr)!=null){
+                    attrs.valueAttr.set(binExpr,attrs.valueAttr.get(binExpr.fstExpr)*attrs.valueAttr.get(binExpr.sndExpr));
+                }
+                break;
+            case DIV:
+                if(attrs.valueAttr.get(binExpr.fstExpr)!=null && attrs.valueAttr.get(binExpr.sndExpr)!=null){
+                    attrs.valueAttr.set(binExpr,attrs.valueAttr.get(binExpr.fstExpr)/attrs.valueAttr.get(binExpr.sndExpr));
+                }
+                break;
+            case MOD:
+                if(attrs.valueAttr.get(binExpr.fstExpr)!=null && attrs.valueAttr.get(binExpr.sndExpr)!=null){
+                    attrs.valueAttr.set(binExpr,attrs.valueAttr.get(binExpr.fstExpr)%attrs.valueAttr.get(binExpr.sndExpr));
+                }
+                break;
+        }
+    }
+
+    @Override
+    public void visit(UnExpr unExpr){
+        unExpr.subExpr.accept(this);
+        switch(unExpr.oper){
+            case ADD:
+                if(attrs.valueAttr.get(unExpr.subExpr)!=null){
+                    attrs.valueAttr.set(unExpr,+attrs.valueAttr.get(unExpr.subExpr));
+                }
+                break;
+            case SUB:
+                if(attrs.valueAttr.get(unExpr.subExpr)!=null){
+                    attrs.valueAttr.set(unExpr,-attrs.valueAttr.get(unExpr.subExpr));
+                }
+                break;
+        }
+    }
 }
