@@ -19,14 +19,155 @@ import compiler.data.ast.code.*;
  */
 public class EvalDecl extends FullVisitor {
 
-	private final Attributes attrs;
-	
-	public EvalDecl(Attributes attrs) {
-		this.attrs = attrs;
-	}
+    private final Attributes attrs;
+    
+    public EvalDecl(Attributes attrs) {
+        this.attrs = attrs;
+    }
 
-	/** The symbol table. */
-	private SymbolTable symbolTable = new SymbolTable();
+    /** The symbol table. */
+    private SymbolTable symbolTable = new SymbolTable();
 
-	// TODO
+    @Override
+    public void visit(BinExpr binExpr){
+        binExpr.fstExpr.accept(this);
+        if(binExpr.fstExpr instanceof Declarable && binExpr.oper == BinExpr.Oper.REC){
+            symbolTable.enterNamespace(((Declarable)binExpr.fstExpr).name());
+            binExpr.sndExpr.accept(this);
+            symbolTable.leaveNamespace();
+        }else binExpr.sndExpr.accept(this);
+    }
+
+    @Override
+    public void visit(CompDecl compDecl){
+        if(compDecl.type instanceof RecType){
+            symbolTable.enterNamespace(compDecl.name);
+            compDecl.type.accept(this);
+            symbolTable.leaveNamespace();
+        }else compDecl.type.accept(this);
+        try{
+            symbolTable.insDecl(symbolTable.newNamespace(""),compDecl.name,compDecl);
+        }catch(CannotInsNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(CompName compName){
+        try{
+            attrs.declAttr.set(compName,symbolTable.fndDecl(symbolTable.newNamespace(""),compName.name()));
+        }catch(CannotFndNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(FunCall funCall){
+        for (int a = 0; a < funCall.numArgs(); a++)
+            funCall.arg(a).accept(this);
+        try{
+            attrs.declAttr.set(funCall,symbolTable.fndDecl(funCall.name()));
+        }catch(CannotFndNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(FunDecl funDecl){
+        symbolTable.enterScope();
+        for (int p = 0; p < funDecl.numPars(); p++)
+            funDecl.par(p).accept(this);
+        symbolTable.leaveScope();
+        funDecl.type.accept(this);
+        try{
+            symbolTable.insDecl(symbolTable.newNamespace(""),funDecl.name,funDecl);
+        }catch(CannotInsNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(FunDef funDef){
+        symbolTable.enterScope();
+        for (int p = 0; p < funDef.numPars(); p++)
+            funDef.par(p).accept(this);
+        funDef.body.accept(this);
+        symbolTable.leaveScope();
+        funDef.type.accept(this);
+        try{
+            symbolTable.insDecl(symbolTable.newNamespace(""),funDef.name,funDef);
+        }catch(CannotInsNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(ParDecl parDecl){
+        if(parDecl.type instanceof RecType){
+            symbolTable.enterNamespace(parDecl.name);
+            parDecl.type.accept(this);
+            symbolTable.leaveNamespace();
+        }else parDecl.type.accept(this);
+        try{
+            symbolTable.insDecl(symbolTable.newNamespace(""),parDecl.name,parDecl);
+        }catch(CannotInsNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(TypeDecl typeDecl){
+        if(typeDecl.type instanceof RecType){
+            symbolTable.enterNamespace(typeDecl.name);
+            typeDecl.type.accept(this);
+            symbolTable.leaveNamespace();
+        }else typeDecl.type.accept(this);
+        try{
+            symbolTable.insDecl(symbolTable.newNamespace(""),typeDecl.name,typeDecl);
+        }catch(CannotInsNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(TypeName typeName){
+        try{
+            attrs.declAttr.set(typeName,symbolTable.fndDecl(typeName.name()));
+        }catch(CannotFndNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(VarDecl varDecl){
+        if(varDecl.type instanceof RecType){
+            symbolTable.enterNamespace(varDecl.name);
+            varDecl.type.accept(this);
+            symbolTable.leaveNamespace();
+        }else varDecl.type.accept(this);
+        try{
+            symbolTable.insDecl(symbolTable.newNamespace(""),varDecl.name,varDecl);
+        }catch(CannotInsNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+    
+    @Override
+    public void visit(VarName varName){
+        try{
+            attrs.declAttr.set(varName,symbolTable.fndDecl(varName.name()));
+        }catch(CannotFndNameDecl ex){
+            ex.printStackTrace();
+        }
+    }
+
+    @Override
+    public void visit(WhereExpr whereExpr){
+        symbolTable.enterScope();
+        for (int d = 0; d < whereExpr.numDecls(); d++)
+            whereExpr.decl(d).accept(this);
+        whereExpr.expr.accept(this);
+        symbolTable.leaveScope();
+    }
 }
+

@@ -44,7 +44,9 @@ public class EvalValue extends FullVisitor {
             case ADD:
                 if(attrs.valueAttr.get(binExpr.fstExpr)!=null && attrs.valueAttr.get(binExpr.sndExpr)!=null){
                     attrs.valueAttr.set(binExpr,attrs.valueAttr.get(binExpr.fstExpr)+attrs.valueAttr.get(binExpr.sndExpr));
-                }
+                }//else{
+                    //attrs.valueAttr.set(binExpr,null);
+                //}
                 break;
             case SUB:
                 if(attrs.valueAttr.get(binExpr.fstExpr)!=null && attrs.valueAttr.get(binExpr.sndExpr)!=null){

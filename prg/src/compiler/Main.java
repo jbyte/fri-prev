@@ -78,7 +78,6 @@ public class Main {
         }catch(IOException ioe){
             ioe.printStackTrace();
         }
-
         if (Report.getNumWarnings() > 0) {
             // There is still room for improvement.
             Report.warning("Have you seen all warning messages?");
