@@ -155,6 +155,10 @@ public class SymbolTable {
 				scopes.peek().addFirst(nameSpace + name);
 			}
 		}
+		//System.out.println("inserting("+scope+"):"+nameSpace+name);
+		/*Set<String> set = symbolTable.keySet();
+		for(String s : set)
+			System.out.println("scope:"+scope+":"+s);*/
 	}
 
 	/**
@@ -186,6 +190,10 @@ public class SymbolTable {
 	 *             If the declaration is not found.
 	 */
 	public Decl fndDecl(String nameSpace, String name) throws CannotFndNameDecl {
+		//System.out.println("looking for("+scope+"):"+nameSpace+name);
+		/*Set<String> set = symbolTable.keySet();
+		for(String s : set)
+			System.out.println("scope:"+scope+":"+s);*/
 		LinkedList<ScopedDecl> scopedDecls = symbolTable.get(nameSpace + name);
 		if ((scopedDecls == null) || (scopedDecls.isEmpty()))
 			throw new CannotFndNameDecl(nameSpace + name);

@@ -22,10 +22,12 @@ public class EvalDecl extends FullVisitor {
     private final Attributes attrs;
 
     private int iteration;
+    private boolean tmp;
     
     public EvalDecl(Attributes attrs) {
         this.attrs = attrs;
         this.iteration = 1;
+        this.tmp = false;
     }
 
     /** The symbol table. */
@@ -36,8 +38,11 @@ public class EvalDecl extends FullVisitor {
         binExpr.fstExpr.accept(this);
         if(binExpr.fstExpr instanceof Declarable && binExpr.oper == BinExpr.Oper.REC){
             if(iteration==2){
-                if(attrs.declAttr.get((Declarable)binExpr.fstExpr) instanceof TypeDecl)
-                    symbolTable.enterNamespace(attrs.declAttr.get(((Declarable)binExpr.fstExpr)).name);
+                Decl decl = attrs.declAttr.get((Declarable)binExpr.fstExpr);
+                if(decl.type instanceof TypeName)
+                    symbolTable.enterNamespace(((TypeName)decl.type).name());
+                //if(attrs.declAttr.get((Declarable)binExpr.fstExpr) instanceof TypeDecl)
+                    //symbolTable.enterNamespace(attrs.declAttr.get(((Declarable)binExpr.fstExpr)).name);
                 else
                     symbolTable.enterNamespace(((Declarable)binExpr.fstExpr).name());
                 binExpr.sndExpr.accept(this);
@@ -172,11 +177,22 @@ public class EvalDecl extends FullVisitor {
     @Override
     public void visit(VarName varName){
         try{
-            if(iteration==2)
-                attrs.declAttr.set(varName,symbolTable.fndDecl(varName.name()));
+            Decl decl = symbolTable.fndDecl(varName.name());
+            if(decl instanceof ParDecl && iteration==1){
+                attrs.declAttr.set(varName,decl);
+                tmp = true;
+            }else if(iteration==2)
+                attrs.declAttr.set(varName,decl);
         }catch(CannotFndNameDecl ex){
-            ex.printStackTrace();
+            if(iteration==2 && !tmp)
+                ex.printStackTrace();
         }
+        //try{
+            //if(iteration==2 && !tmp)
+                //attrs.declAttr.set(varName,symbolTable.fndDecl(varName.name()));
+        //}catch(CannotFndNameDecl ex){
+            //ex.printStackTrace();
+        //}
     }
 
     @Override
