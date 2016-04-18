@@ -22,9 +22,12 @@ import compiler.data.typ.*;
 public class EvalTyp extends FullVisitor {
 
     private final Attributes attrs;
+
+    private int iteration;
     
     public EvalTyp(Attributes attrs) {
         this.attrs = attrs;
+        this.iteration = 0;
     }
     
     /** The symbol table. */
@@ -92,9 +95,11 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(CompDecl compDecl) {
-        compDecl.type.accept(this);
-        Typ typ = attrs.typAttr.get(compDecl.type);
-        attrs.typAttr.set(compDecl,typ);
+        if(iteration==0){
+            compDecl.type.accept(this);
+            Typ typ = attrs.typAttr.get(compDecl.type);
+            attrs.typAttr.set(compDecl,typ);
+        }
     }
 
     public void visit(CompName compName) {
@@ -124,16 +129,34 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(FunDecl funDecl) {
-        for (int p = 0; p < funDecl.numPars(); p++)
-            funDecl.par(p).accept(this);
-        funDecl.type.accept(this);
+        if(iteration==0){
+            for (int p = 0; p < funDecl.numPars(); p++)
+                funDecl.par(p).accept(this);
+        }
+        if(iteration==1){
+            funDecl.type.accept(this);
+            LinkedList<Typ> list = new LinkedList<Typ>();
+            for(int p=0; p<funDecl.numPars(); p++)
+                list.add(attrs.typAttr.get(funDecl.par(p)));
+            attrs.typAttr.set(funDecl,new FunTyp(list,attrs.typAttr.get(funDecl.type)));
+        }
     }
 
     public void visit(FunDef funDef) {
-        for (int p = 0; p < funDef.numPars(); p++)
-            funDef.par(p).accept(this);
-        funDef.type.accept(this);
-        funDef.body.accept(this);
+        if(iteration==0){
+            for (int p = 0; p < funDef.numPars(); p++)
+                funDef.par(p).accept(this);
+        }
+        if(iteration==1){
+            funDef.type.accept(this);
+            LinkedList<Typ> list = new LinkedList<Typ>();
+            for(int p=0; p<funDef.numPars(); p++)
+                list.add(attrs.typAttr.get(funDef.par(p)));
+            attrs.typAttr.set(funDef,new FunTyp(list,attrs.typAttr.get(funDef.type)));
+        }
+        if(iteration==2){
+            funDef.body.accept(this);
+        }
     }
 
     public void visit(IfExpr ifExpr) {
@@ -143,9 +166,11 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(ParDecl parDecl) {
-        parDecl.type.accept(this);
-        Typ typ = attrs.typAttr.get(parDecl.type);
-        attrs.typAttr.set(parDecl,typ);
+        if(iteration==0){
+            parDecl.type.accept(this);
+            Typ typ = attrs.typAttr.get(parDecl.type);
+            attrs.typAttr.set(parDecl,typ);
+        }
     }
 
     public void visit(Program program) {
@@ -167,11 +192,13 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(TypeDecl typDecl) {
-        typDecl.type.accept(this);
-        Typ typ = attrs.typAttr.get(typDecl.type);
-        TypName typName = new TypName(typDecl.name);
-        typName.setType(typ);
-        attrs.typAttr.set(typDecl,typName);
+        if(iteration==0){
+            typDecl.type.accept(this);
+            Typ typ = attrs.typAttr.get(typDecl.type);
+            TypName typName = new TypName(typDecl.name);
+            typName.setType(typ);
+            attrs.typAttr.set(typDecl,typName);
+        }
     }
     
     public void visit(TypeError typeError) {
@@ -189,15 +216,23 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(VarDecl varDecl) {
-        varDecl.type.accept(this);
-        Typ typ = attrs.typAttr.get(varDecl.type);
-        attrs.typAttr.set(varDecl,typ);
+        if(iteration==0){
+            varDecl.type.accept(this);
+            Typ typ = attrs.typAttr.get(varDecl.type);
+            attrs.typAttr.set(varDecl,typ);
+        }
     }
 
     public void visit(VarName varName) {
     }
 
     public void visit(WhereExpr whereExpr) {
+        for (int d = 0; d < whereExpr.numDecls(); d++)
+            whereExpr.decl(d).accept(this);
+        iteration++;
+        for (int d = 0; d < whereExpr.numDecls(); d++)
+            whereExpr.decl(d).accept(this);
+        iteration++;
         for (int d = 0; d < whereExpr.numDecls(); d++)
             whereExpr.decl(d).accept(this);
         whereExpr.expr.accept(this);
