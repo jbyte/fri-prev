@@ -20,9 +20,12 @@ import compiler.data.ast.code.*;
 public class EvalDecl extends FullVisitor {
 
     private final Attributes attrs;
+
+    private int iteration;
     
     public EvalDecl(Attributes attrs) {
         this.attrs = attrs;
+        this.iteration = 1;
     }
 
     /** The symbol table. */
@@ -32,9 +35,14 @@ public class EvalDecl extends FullVisitor {
     public void visit(BinExpr binExpr){
         binExpr.fstExpr.accept(this);
         if(binExpr.fstExpr instanceof Declarable && binExpr.oper == BinExpr.Oper.REC){
-            symbolTable.enterNamespace(((Declarable)binExpr.fstExpr).name());
-            binExpr.sndExpr.accept(this);
-            symbolTable.leaveNamespace();
+            if(iteration==2){
+                if(attrs.declAttr.get((Declarable)binExpr.fstExpr) instanceof TypeDecl)
+                    symbolTable.enterNamespace(attrs.declAttr.get(((Declarable)binExpr.fstExpr)).name);
+                else
+                    symbolTable.enterNamespace(((Declarable)binExpr.fstExpr).name());
+                binExpr.sndExpr.accept(this);
+                symbolTable.leaveNamespace();
+            }
         }else binExpr.sndExpr.accept(this);
     }
 
@@ -46,7 +54,8 @@ public class EvalDecl extends FullVisitor {
             symbolTable.leaveNamespace();
         }else compDecl.type.accept(this);
         try{
-            symbolTable.insDecl(symbolTable.newNamespace(""),compDecl.name,compDecl);
+            if(iteration==1)
+                symbolTable.insDecl(symbolTable.newNamespace(""),compDecl.name,compDecl);
         }catch(CannotInsNameDecl ex){
             ex.printStackTrace();
         }
@@ -55,7 +64,8 @@ public class EvalDecl extends FullVisitor {
     @Override
     public void visit(CompName compName){
         try{
-            attrs.declAttr.set(compName,symbolTable.fndDecl(symbolTable.newNamespace(""),compName.name()));
+            if(iteration==2)
+                attrs.declAttr.set(compName,symbolTable.fndDecl(symbolTable.newNamespace(""),compName.name()));
         }catch(CannotFndNameDecl ex){
             ex.printStackTrace();
         }
@@ -66,7 +76,8 @@ public class EvalDecl extends FullVisitor {
         for (int a = 0; a < funCall.numArgs(); a++)
             funCall.arg(a).accept(this);
         try{
-            attrs.declAttr.set(funCall,symbolTable.fndDecl(funCall.name()));
+            if(iteration==2)
+                attrs.declAttr.set(funCall,symbolTable.fndDecl(funCall.name()));
         }catch(CannotFndNameDecl ex){
             ex.printStackTrace();
         }
@@ -80,7 +91,8 @@ public class EvalDecl extends FullVisitor {
         symbolTable.leaveScope();
         funDecl.type.accept(this);
         try{
-            symbolTable.insDecl(symbolTable.newNamespace(""),funDecl.name,funDecl);
+            if(iteration==1)
+                symbolTable.insDecl(symbolTable.newNamespace(""),funDecl.name,funDecl);
         }catch(CannotInsNameDecl ex){
             ex.printStackTrace();
         }
@@ -95,7 +107,8 @@ public class EvalDecl extends FullVisitor {
         symbolTable.leaveScope();
         funDef.type.accept(this);
         try{
-            symbolTable.insDecl(symbolTable.newNamespace(""),funDef.name,funDef);
+            if(iteration==1)
+                symbolTable.insDecl(symbolTable.newNamespace(""),funDef.name,funDef);
         }catch(CannotInsNameDecl ex){
             ex.printStackTrace();
         }
@@ -109,7 +122,8 @@ public class EvalDecl extends FullVisitor {
             symbolTable.leaveNamespace();
         }else parDecl.type.accept(this);
         try{
-            symbolTable.insDecl(symbolTable.newNamespace(""),parDecl.name,parDecl);
+            if(iteration==1)
+                symbolTable.insDecl(symbolTable.newNamespace(""),parDecl.name,parDecl);
         }catch(CannotInsNameDecl ex){
             ex.printStackTrace();
         }
@@ -123,7 +137,8 @@ public class EvalDecl extends FullVisitor {
             symbolTable.leaveNamespace();
         }else typeDecl.type.accept(this);
         try{
-            symbolTable.insDecl(symbolTable.newNamespace(""),typeDecl.name,typeDecl);
+            if(iteration==1)
+                symbolTable.insDecl(symbolTable.newNamespace(""),typeDecl.name,typeDecl);
         }catch(CannotInsNameDecl ex){
             ex.printStackTrace();
         }
@@ -132,7 +147,8 @@ public class EvalDecl extends FullVisitor {
     @Override
     public void visit(TypeName typeName){
         try{
-            attrs.declAttr.set(typeName,symbolTable.fndDecl(typeName.name()));
+            if(iteration==2)
+                attrs.declAttr.set(typeName,symbolTable.fndDecl(typeName.name()));
         }catch(CannotFndNameDecl ex){
             ex.printStackTrace();
         }
@@ -146,7 +162,8 @@ public class EvalDecl extends FullVisitor {
             symbolTable.leaveNamespace();
         }else varDecl.type.accept(this);
         try{
-            symbolTable.insDecl(symbolTable.newNamespace(""),varDecl.name,varDecl);
+            if(iteration==1)
+                symbolTable.insDecl(symbolTable.newNamespace(""),varDecl.name,varDecl);
         }catch(CannotInsNameDecl ex){
             ex.printStackTrace();
         }
@@ -155,7 +172,8 @@ public class EvalDecl extends FullVisitor {
     @Override
     public void visit(VarName varName){
         try{
-            attrs.declAttr.set(varName,symbolTable.fndDecl(varName.name()));
+            if(iteration==2)
+                attrs.declAttr.set(varName,symbolTable.fndDecl(varName.name()));
         }catch(CannotFndNameDecl ex){
             ex.printStackTrace();
         }
@@ -164,6 +182,9 @@ public class EvalDecl extends FullVisitor {
     @Override
     public void visit(WhereExpr whereExpr){
         symbolTable.enterScope();
+        for (int d = 0; d < whereExpr.numDecls(); d++)
+            whereExpr.decl(d).accept(this);
+        iteration++;
         for (int d = 0; d < whereExpr.numDecls(); d++)
             whereExpr.decl(d).accept(this);
         whereExpr.expr.accept(this);
