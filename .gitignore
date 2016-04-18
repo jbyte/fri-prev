@@ -26,3 +26,6 @@ hs_err_pid*
 *.zip
 *.rar
 *.tar.gz
+
+# error files (for testing)
+*.err
