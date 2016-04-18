@@ -89,24 +89,46 @@ public class EvalTyp extends FullVisitor {
         binExpr.sndExpr.accept(this);
         Typ fstTyp = attrs.typAttr.get(binExpr.fstExpr);
         Typ sndTyp = attrs.typAttr.get(binExpr.sndExpr);
-        if(fstTyp instanceof IntegerTyp && sndTyp instanceof IntegerTyp){
+        if(Typ.equiv(fstTyp,new IntegerTyp()) && Typ.equiv(sndTyp,new IntegerTyp())){
             if(binExpr.oper==BinExpr.Oper.ADD ||binExpr.oper==BinExpr.Oper.SUB ||
                     binExpr.oper==BinExpr.Oper.MUL || binExpr.oper==BinExpr.Oper.DIV ||
                     binExpr.oper==BinExpr.Oper.MOD)
                 attrs.typAttr.set(binExpr,new IntegerTyp());
             if(binExpr.oper==BinExpr.Oper.REC)
                 attrs.typAttr.set(binExpr,sndTyp);
-        }else if(fstTyp instanceof BooleanTyp && sndTyp instanceof BooleanTyp){
+            if(binExpr.oper==BinExpr.Oper.EQU || binExpr.oper==BinExpr.Oper.NEQ ||
+                    binExpr.oper==BinExpr.Oper.LTH || binExpr.oper==BinExpr.Oper.GTH ||
+                    binExpr.oper==BinExpr.Oper.LEQ || binExpr.oper==BinExpr.Oper.GEQ)
+                attrs.typAttr.set(binExpr,new BooleanTyp());
+            if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
+                attrs.typAttr.set(binExpr,new VoidTyp());
+        }else if(Typ.equiv(fstTyp,new BooleanTyp()) && Typ.equiv(sndTyp,new BooleanTyp())){
             if(binExpr.oper==BinExpr.Oper.AND || binExpr.oper==BinExpr.Oper.OR)
                 attrs.typAttr.set(binExpr,new BooleanTyp());
             if(binExpr.oper==BinExpr.Oper.REC)
                 attrs.typAttr.set(binExpr,sndTyp);
-        }else if(fstTyp instanceof ArrTyp && sndTyp instanceof IntegerTyp &&
-                binExpr.oper==BinExpr.Oper.ARR){
+            if(binExpr.oper==BinExpr.Oper.EQU || binExpr.oper==BinExpr.Oper.NEQ ||
+                    binExpr.oper==BinExpr.Oper.LTH || binExpr.oper==BinExpr.Oper.GTH ||
+                    binExpr.oper==BinExpr.Oper.LEQ || binExpr.oper==BinExpr.Oper.GEQ)
+                attrs.typAttr.set(binExpr,new BooleanTyp());
+            if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
+                attrs.typAttr.set(binExpr,new VoidTyp());
+        }else if(fstTyp instanceof ArrTyp && sndTyp instanceof IntegerTyp && binExpr.oper==BinExpr.Oper.ARR){
             attrs.typAttr.set(binExpr,((ArrTyp)fstTyp).elemTyp);
         }else{
             if(binExpr.oper==BinExpr.Oper.REC)
-                attrs.typAttr.set(binExpr,sndTyp);
+                if(Typ.equiv(fstTyp,sndTyp)){
+                    attrs.typAttr.set(binExpr,sndTyp);
+                }
+            if(binExpr.oper==BinExpr.Oper.EQU || binExpr.oper==BinExpr.Oper.NEQ ||
+                    binExpr.oper==BinExpr.Oper.LTH || binExpr.oper==BinExpr.Oper.GTH ||
+                    binExpr.oper==BinExpr.Oper.LEQ || binExpr.oper==BinExpr.Oper.GEQ){
+                if(Typ.equiv(fstTyp,sndTyp)){
+                    attrs.typAttr.set(binExpr,new BooleanTyp());
+                }
+            }
+            if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
+                attrs.typAttr.set(binExpr,new VoidTyp());
         }
     }
 
@@ -115,9 +137,8 @@ public class EvalTyp extends FullVisitor {
         castExpr.expr.accept(this);
         Typ typTyp = attrs.typAttr.get(castExpr.type);
         Typ exprTyp = attrs.typAttr.get(castExpr.expr);
-        if(typTyp instanceof PtrTyp && exprTyp instanceof PtrTyp)
-            if(((PtrTyp)exprTyp).baseTyp instanceof VoidTyp)
-                attrs.typAttr.set(castExpr,((PtrTyp)typTyp).baseTyp);
+        if(typTyp instanceof PtrTyp && Typ.equiv(exprTyp,new PtrTyp(new VoidTyp())))
+            attrs.typAttr.set(castExpr,((PtrTyp)typTyp).baseTyp);
     }
 
     public void visit(CompDecl compDecl) {
@@ -162,8 +183,8 @@ public class EvalTyp extends FullVisitor {
         Typ loTyp = attrs.typAttr.get(forExpr.loBound);
         Typ hiTyp = attrs.typAttr.get(forExpr.hiBound);
         Typ bodyTyp = attrs.typAttr.get(forExpr.body);
-        if(varTyp instanceof IntegerTyp && loTyp instanceof IntegerTyp &&
-                hiTyp instanceof IntegerTyp && bodyTyp!=null)
+        if(Typ.equiv(varTyp,new IntegerTyp()) && Typ.equiv(loTyp,new IntegerTyp()) &&
+                Typ.equiv(hiTyp,new IntegerTyp()) && bodyTyp!=null)
             attrs.typAttr.set(forExpr,new VoidTyp());
     }
 
@@ -213,7 +234,7 @@ public class EvalTyp extends FullVisitor {
         Typ condTyp = attrs.typAttr.get(ifExpr.cond);
         Typ thenTyp = attrs.typAttr.get(ifExpr.thenExpr);
         Typ elseTyp = attrs.typAttr.get(ifExpr.elseExpr);
-        if(condTyp instanceof BooleanTyp && thenTyp!=null && elseTyp!=null)
+        if(Typ.equiv(condTyp,new BooleanTyp()) && thenTyp!=null && elseTyp!=null)
             attrs.typAttr.set(ifExpr,new VoidTyp());
     }
 
@@ -266,9 +287,9 @@ public class EvalTyp extends FullVisitor {
     public void visit(UnExpr unExpr) {
         unExpr.subExpr.accept(this);
         Typ typ = attrs.typAttr.get(unExpr.subExpr);
-        if(typ instanceof BooleanTyp && unExpr.oper==UnExpr.Oper.NOT)
+        if(Typ.equiv(typ,new BooleanTyp()) && unExpr.oper==UnExpr.Oper.NOT)
             attrs.typAttr.set(unExpr,typ);
-        else if(typ instanceof IntegerTyp && (unExpr.oper==UnExpr.Oper.ADD || 
+        else if(Typ.equiv(typ,new IntegerTyp()) && (unExpr.oper==UnExpr.Oper.ADD || 
                     unExpr.oper==UnExpr.Oper.SUB))
             attrs.typAttr.set(unExpr,typ);
         else if(typ instanceof PtrTyp)
@@ -314,7 +335,7 @@ public class EvalTyp extends FullVisitor {
         whileExpr.body.accept(this);
         Typ condTyp = attrs.typAttr.get(whileExpr.cond);
         Typ bodyTyp = attrs.typAttr.get(whileExpr.body);
-        if(condTyp instanceof BooleanTyp && bodyTyp!=null)
+        if(Typ.equiv(condTyp,new BooleanTyp()) && bodyTyp!=null)
             attrs.typAttr.set(whileExpr,new VoidTyp());
     }
 
