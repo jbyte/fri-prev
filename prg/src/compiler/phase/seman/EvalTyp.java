@@ -100,8 +100,8 @@ public class EvalTyp extends FullVisitor {
                     binExpr.oper==BinExpr.Oper.LTH || binExpr.oper==BinExpr.Oper.GTH ||
                     binExpr.oper==BinExpr.Oper.LEQ || binExpr.oper==BinExpr.Oper.GEQ)
                 attrs.typAttr.set(binExpr,new BooleanTyp());
-            if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
-                attrs.typAttr.set(binExpr,new VoidTyp());
+            //if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
+                //attrs.typAttr.set(binExpr,new VoidTyp());
         }else if(Typ.equiv(fstTyp,new BooleanTyp()) && Typ.equiv(sndTyp,new BooleanTyp())){
             if(binExpr.oper==BinExpr.Oper.AND || binExpr.oper==BinExpr.Oper.OR)
                 attrs.typAttr.set(binExpr,new BooleanTyp());
@@ -111,13 +111,13 @@ public class EvalTyp extends FullVisitor {
                     binExpr.oper==BinExpr.Oper.LTH || binExpr.oper==BinExpr.Oper.GTH ||
                     binExpr.oper==BinExpr.Oper.LEQ || binExpr.oper==BinExpr.Oper.GEQ)
                 attrs.typAttr.set(binExpr,new BooleanTyp());
-            if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
-                attrs.typAttr.set(binExpr,new VoidTyp());
+            //if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
+                //attrs.typAttr.set(binExpr,new VoidTyp());
         }else if(fstTyp instanceof ArrTyp && sndTyp instanceof IntegerTyp && binExpr.oper==BinExpr.Oper.ARR){
             attrs.typAttr.set(binExpr,((ArrTyp)fstTyp).elemTyp);
         }else{
             if(binExpr.oper==BinExpr.Oper.REC)
-                if(Typ.equiv(fstTyp,sndTyp)){
+                if(fstTyp instanceof Typ && sndTyp instanceof Typ){
                     attrs.typAttr.set(binExpr,sndTyp);
                 }
             if(binExpr.oper==BinExpr.Oper.EQU || binExpr.oper==BinExpr.Oper.NEQ ||
@@ -127,8 +127,8 @@ public class EvalTyp extends FullVisitor {
                     attrs.typAttr.set(binExpr,new BooleanTyp());
                 }
             }
-            if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
-                attrs.typAttr.set(binExpr,new VoidTyp());
+            //if(binExpr.oper==BinExpr.Oper.ASSIGN && attrs.memAttr.get(binExpr.fstExpr))
+                //attrs.typAttr.set(binExpr,new VoidTyp());
         }
     }
 

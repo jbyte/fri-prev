@@ -59,8 +59,8 @@ public class Main {
                 SemAn seman = new SemAn(task);
                 (new EvalValue(task.prgAttrs)).visit(task.prgAST);
                 (new EvalDecl(task.prgAttrs)).visit(task.prgAST);
-                (new EvalMem(task.prgAttrs)).visit(task.prgAST);
                 (new EvalTyp(task.prgAttrs)).visit(task.prgAST);
+                (new EvalMem(task.prgAttrs)).visit(task.prgAST);
                 seman.close();
                 if (task.phase.equals("seman"))
                     break;
