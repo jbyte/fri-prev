@@ -153,7 +153,8 @@ public class EvalTyp extends FullVisitor {
         if(iteration>0){
             Decl decl = attrs.declAttr.get(compName);
             Typ typ = attrs.typAttr.get(decl);
-            attrs.typAttr.set(compName,typ);
+            //if(typ!=null)
+                attrs.typAttr.set(compName,typ);
         }
     }
     
@@ -193,7 +194,8 @@ public class EvalTyp extends FullVisitor {
             funCall.arg(a).accept(this);
         Decl decl = attrs.declAttr.get(funCall);
         Typ typ = attrs.typAttr.get(decl);
-        attrs.typAttr.set(funCall,((FunTyp)typ).resultTyp);
+        if(typ!=null)
+            attrs.typAttr.set(funCall,((FunTyp)typ).resultTyp);
     }
 
     public void visit(FunDecl funDecl) {
@@ -307,7 +309,8 @@ public class EvalTyp extends FullVisitor {
     public void visit(VarName varName) {
         if(iteration>0){
             Decl decl = attrs.declAttr.get(varName);
-            attrs.typAttr.set(varName,attrs.typAttr.get(decl.type));
+            if(decl!=null)
+                attrs.typAttr.set(varName,attrs.typAttr.get(decl.type));
         }
     }
 
