@@ -61,6 +61,7 @@ public class Main {
                 (new EvalDecl(task.prgAttrs)).visit(task.prgAST);
                 (new EvalTyp(task.prgAttrs)).visit(task.prgAST);
                 (new EvalMem(task.prgAttrs)).visit(task.prgAST);
+                (new EvalTypAfMem(task.prgAttrs)).visit(task.prgAST);
                 seman.close();
                 if (task.phase.equals("seman"))
                     break;
