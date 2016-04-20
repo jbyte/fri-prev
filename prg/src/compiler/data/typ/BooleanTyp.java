@@ -20,11 +20,6 @@ public class BooleanTyp extends AtomTyp implements AssignableTyp, ComparableTyp,
     }
  
     @Override
-    public long size() {
-        return 1;
-    }
- 
-    @Override
     public void log(Logger logger) {
         logger.begElement("typ");
         logger.addAttribute("kind", "BOOLEAN");
