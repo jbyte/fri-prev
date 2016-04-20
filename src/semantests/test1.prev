@@ -1,0 +1,5 @@
+(1+i,f(i)+1)
+where
+  fun f(n:integer):integer=n+i
+  var i:integer
+end

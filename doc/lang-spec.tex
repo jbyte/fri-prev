@@ -102,12 +102,12 @@ creates a new scope:
 
 \subsection{Constant integer expressions}
 
-Semantic function
-$$ \valattr{\cdot} \colon {\cal P} \rightarrow \{(-2^{63})\ldots(+2^{63}-1)\} $$
+Let $ \mathrm{I} = \{(-2^{63})\ldots(+2^{63}-1)\} $.  Semantic function
+$$ \valattr{\cdot} \colon {\cal P} \rightarrow \mathrm{I} $$
 maps phrases of PREV to the integer values they denote.  It is defined by the following rules:
 %
 $$ \begin{array}{c}
-   -2^{63} \leq \mbox{\textit{lexeme}}(\term{INTEGER}) \leq +2^{63}-1
+   \mbox{\textit{lexeme}}(\term{INTEGER}) \in \mathrm{I}
    \\[2pt]\hline\\[-10pt]
    \valattr{\term{INTEGER}} = \mbox{\textit{lexeme}}(\term{INTEGER})
    \end{array} $$
@@ -116,7 +116,7 @@ $$ \begin{array}{c}
    \valattr{\nont{expr}} = n \quad
    \mbox{op}\in\{\term{+},\term{-}\}
    \\[2pt]\hline\\[-10pt]
-   \valattr{\mbox{op}\ \mbox{expr}} = n
+   \valattr{\mbox{op}\ \mbox{expr}} = \mbox{op}\ n
    \end{array}
   \quad
    \begin{array}{c}
@@ -156,10 +156,10 @@ $$
 
 \end{array}
 $$
-denotes a set of all types of PREV.
+denotes a set of all types of PREV.  Two types are equal if they share the same structure.
 
 Semantic function $ \typattr{.} $
-$$ \valattr{\cdot} \colon {\cal P} \rightarrow \mathrm{T} $$
+$$ \typattr{\cdot} \colon {\cal P} \rightarrow \mathrm{T} $$
 maps phrases of PREV to types.
 
 Let function $ \mbox{\textsc{DECL}} $ maps a type, function, variable or parameter name to its declaration according to the namespace and scope rules specified above and let $ \mbox{\textsc{DECL}}_\tau $ map a component name to its declaration within (a record) type $ \tau $.  If a name is undefined in the current namespace or scope, functions $ \mbox{\textsc{DECL}} $ and $ \mbox{\textsc{DECL}}_\tau $ return $ \bot $.  The semantic function $ \typattr{.} $ is defined by the rules in the following subsections.  In cases when no rule can be applied, the semantic function $ \typattr{.} $ is left undefined (denoted by $ \bot $).
@@ -193,6 +193,7 @@ $$ \begin{array}{c}
    
 $$ \begin{array}{c}
    \valattr{\nont{expr}} = n \quad
+   n > 0 \quad
    \typattr{\nont{type}} = \tau
    \\[2pt]\hline\\[-10pt]
    \typattr{\term{arr}\ \term{[}\nont{expr}\term{]}\ \nont{type}} = \type{arr}(n\times\tau)
@@ -268,7 +269,7 @@ $$ \begin{array}{c}
    \typattr{\nont{expr}_2} = \type{integer} \quad
    \mbox{op}\in\{\term{+},\term{-},\term{*},\term{/},\term{\%}\}
    \\[2pt]\hline\\[-10pt]
-   \typattr{\nont{expr}_1\ \mbox{op}\ \nont{expr}_2} = \type{boolean}
+   \typattr{\nont{expr}_1\ \mbox{op}\ \nont{expr}_2} = \type{integer}
    \end{array} $$
  
 $$ \begin{array}{c}

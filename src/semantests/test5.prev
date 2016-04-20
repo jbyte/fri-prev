@@ -1,0 +1,12 @@
+(for i=1,10:
+   (for j=1,10:
+      print(i,j)
+    end,
+    1=i
+   )
+ end)
+where
+  fun print(i:integer,j:integer):void
+  var i:integer
+  var j:integer
+end

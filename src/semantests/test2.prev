@@ -1,0 +1,4 @@
+(for i=1,10:if i<5 then 0 else 1 end end)
+where
+  var i:integer
+end

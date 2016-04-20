@@ -7,6 +7,7 @@ import compiler.phase.lexan.*;
 import compiler.phase.synan.*;
 import compiler.phase.abstr.*;
 import compiler.phase.seman.*;
+import compiler.phase.frames.*;
 
 /**
  * The compiler's entry point.
@@ -68,7 +69,13 @@ public class Main {
 
                 if (Report.getNumWarnings() > 0)
                     break;
-
+                
+ 				// Frames and accesses.
+ 				Frames frames = new Frames(task);
+ 				(new EvalFrames(task.prgAttrs)).visit(task.prgAST);
+ 				frames.close();
+ 				if (task.phase.equals("frames"))
+ 					break;
 
                 break;
             }
