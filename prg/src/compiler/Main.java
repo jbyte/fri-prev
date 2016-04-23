@@ -11,7 +11,7 @@ import compiler.phase.frames.*;
 
 /**
  * The compiler's entry point.
- * 
+ *
  * @author sliva
  */
 public class Main {
@@ -19,7 +19,7 @@ public class Main {
     /**
      * The compiler's entry point: it parses the command line and triggers the
      * compilation.
-     * 
+     *
      * @param args
      *            Command line arguments.
      */
@@ -42,7 +42,7 @@ public class Main {
                     lexAn.close();
                     break;
                 }
-                
+
                 // ***** Syntax analysis. *****
                 SynAn synAn = new SynAn(task);
                 task.prgAST = synAn.synAn();
@@ -69,13 +69,13 @@ public class Main {
 
                 if (Report.getNumWarnings() > 0)
                     break;
-                
- 				// Frames and accesses.
- 				Frames frames = new Frames(task);
- 				(new EvalFrames(task.prgAttrs)).visit(task.prgAST);
- 				frames.close();
- 				if (task.phase.equals("frames"))
- 					break;
+
+                // Frames and accesses.
+                Frames frames = new Frames(task);
+                (new EvalFrames(task.prgAttrs)).visit(task.prgAST);
+                frames.close();
+                if (task.phase.equals("frames"))
+                    break;
 
                 break;
             }
