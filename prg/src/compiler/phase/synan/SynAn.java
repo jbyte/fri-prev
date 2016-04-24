@@ -1007,6 +1007,10 @@ public class SynAn extends Phase {
                 list = parseParameters_(list);
             case CLOSING_PARENTHESIS:
                 break;
+            case COMMA:
+                nextSymbol();
+                list = parseParameters_(list);
+                break;
             default:
                 throw new InternalCompilerError();
         }

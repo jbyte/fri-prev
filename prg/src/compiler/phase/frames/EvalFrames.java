@@ -17,13 +17,16 @@ import compiler.data.typ.*;
 public class EvalFrames extends FullVisitor {
 
     private final Attributes attrs;
+    private int level;
 
     public EvalFrames(Attributes attrs) {
         this.attrs = attrs;
+        this.level = 0;
     }
 
     @Override
     public void visit(FunDecl funDecl) {
+        level++;
         long offset = 0;
         for (int p = 0; p < funDecl.numPars(); p++){
             funDecl.par(p).accept(this);
@@ -32,10 +35,16 @@ public class EvalFrames extends FullVisitor {
             offset += typ.size();
         }
         funDecl.type.accept(this);
+        long inpCallSize = offset+8;
+        Typ typ = attrs.typAttr.get(funDecl.type);
+        inpCallSize += typ.size();
+        attrs.frmAttr.set(funDecl,new Frame(level,funDecl.name,inpCallSize,0,0,0,0));
+        level--;
     }
 
     @Override
     public void visit(FunDef funDef) {
+        level++;
         long offset = 0;
         for (int p = 0; p < funDef.numPars(); p++){
             funDef.par(p).accept(this);
@@ -44,7 +53,12 @@ public class EvalFrames extends FullVisitor {
             offset += typ.size();
         }
         funDef.type.accept(this);
+        long inpCallSize = offset+8;
+        Typ typ = attrs.typAttr.get(funDef.type);
+        inpCallSize += typ.size();
         funDef.body.accept(this);
+        attrs.frmAttr.set(funDef,new Frame(level,funDef.name,inpCallSize,0,0,0,0));
+        level--;
     }
 
     @Override

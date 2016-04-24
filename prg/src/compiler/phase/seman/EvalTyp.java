@@ -10,13 +10,13 @@ import compiler.data.typ.*;
 
 /**
  * Type checker.
- * 
+ *
  * <p>
  * Type checker checks type of all sentential forms of the program and resolves
  * the component names as this cannot be done earlier, i.e., in
  * {@link compiler.phase.seman.EvalDecl}.
  * </p>
- * 
+ *
  * @author sliva
  */
 public class EvalTyp extends FullVisitor {
@@ -24,12 +24,12 @@ public class EvalTyp extends FullVisitor {
     private final Attributes attrs;
 
     private int iteration;
-    
+
     public EvalTyp(Attributes attrs) {
         this.attrs = attrs;
         this.iteration = 0;
     }
-    
+
     /** The symbol table. */
     private SymbolTable symbolTable = new SymbolTable();
 
@@ -157,7 +157,7 @@ public class EvalTyp extends FullVisitor {
                 attrs.typAttr.set(compName,typ);
         }
     }
-    
+
     public void visit(DeclError declError) {
     }
 
@@ -275,7 +275,7 @@ public class EvalTyp extends FullVisitor {
             attrs.typAttr.set(typDecl,typName);
         }
     }
-    
+
     public void visit(TypeError typeError) {
     }
 
@@ -291,7 +291,7 @@ public class EvalTyp extends FullVisitor {
         Typ typ = attrs.typAttr.get(unExpr.subExpr);
         if(Typ.equiv(typ,new BooleanTyp()) && unExpr.oper==UnExpr.Oper.NOT)
             attrs.typAttr.set(unExpr,typ);
-        else if(Typ.equiv(typ,new IntegerTyp()) && (unExpr.oper==UnExpr.Oper.ADD || 
+        else if(Typ.equiv(typ,new IntegerTyp()) && (unExpr.oper==UnExpr.Oper.ADD ||
                     unExpr.oper==UnExpr.Oper.SUB))
             attrs.typAttr.set(unExpr,typ);
         else if(typ instanceof PtrTyp)
@@ -310,11 +310,12 @@ public class EvalTyp extends FullVisitor {
         if(iteration>0){
             Decl decl = attrs.declAttr.get(varName);
             if(decl!=null)
-                attrs.typAttr.set(varName,attrs.typAttr.get(decl.type));
+                attrs.typAttr.set(varName,attrs.typAttr.get(decl));
         }
     }
 
     public void visit(WhereExpr whereExpr) {
+        iteration = 0;
         for (int d = 0; d < whereExpr.numDecls(); d++)
             whereExpr.decl(d).accept(this);
         iteration++;
