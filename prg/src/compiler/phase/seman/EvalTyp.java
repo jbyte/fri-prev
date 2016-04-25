@@ -169,7 +169,8 @@ public class EvalTyp extends FullVisitor {
             typ = attrs.typAttr.get(exprs.expr(e));
             if(typ==null)break;
         }
-        if(typ!=null)attrs.typAttr.set(exprs,typ);
+        //if(typ!=null)attrs.typAttr.set(exprs,typ);
+        attrs.typAttr.set(exprs,typ);
     }
 
     public void visit(ExprError exprError) {
@@ -194,8 +195,9 @@ public class EvalTyp extends FullVisitor {
             funCall.arg(a).accept(this);
         Decl decl = attrs.declAttr.get(funCall);
         Typ typ = attrs.typAttr.get(decl);
-        if(typ!=null)
-            attrs.typAttr.set(funCall,((FunTyp)typ).resultTyp);
+        //if(typ!=null)
+            //attrs.typAttr.set(funCall,((FunTyp)typ).resultTyp);
+        attrs.typAttr.set(funCall,((FunTyp)typ).resultTyp);
     }
 
     public void visit(FunDecl funDecl) {
@@ -309,8 +311,9 @@ public class EvalTyp extends FullVisitor {
     public void visit(VarName varName) {
         if(iteration>0){
             Decl decl = attrs.declAttr.get(varName);
-            if(decl!=null)
-                attrs.typAttr.set(varName,attrs.typAttr.get(decl));
+            //if(decl!=null)
+                //attrs.typAttr.set(varName,attrs.typAttr.get(decl));
+            attrs.typAttr.set(varName,attrs.typAttr.get(decl));
         }
     }
 
@@ -331,7 +334,8 @@ public class EvalTyp extends FullVisitor {
             if(decl==null)break;
         }
         Typ typ = attrs.typAttr.get(whereExpr.expr);
-        if(decl!=null && typ!=null) attrs.typAttr.set(whereExpr,typ);
+        //if(decl!=null && typ!=null) attrs.typAttr.set(whereExpr,typ);
+        if(decl!=null) attrs.typAttr.set(whereExpr,typ);
     }
 
     public void visit(WhileExpr whileExpr) {

@@ -7,14 +7,14 @@ import compiler.data.ast.code.*;
 
 /**
  * Declaration resolver.
- * 
+ *
  * <p>
  * Declaration resolver maps each AST node denoting a
  * {@link compiler.data.ast.Declarable} name to the declaration where
  * this name is declared. In other words, it links each use of each name to a
  * declaration of that name.
  * </p>
- * 
+ *
  * @author sliva
  */
 public class EvalDecl extends FullVisitor {
@@ -23,7 +23,7 @@ public class EvalDecl extends FullVisitor {
 
     private int iteration;
     private boolean tmp;
-    
+
     public EvalDecl(Attributes attrs) {
         this.attrs = attrs;
         this.iteration = 1;
@@ -65,7 +65,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(CompName compName){
         try{
@@ -75,7 +75,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(FunCall funCall){
         for (int a = 0; a < funCall.numArgs(); a++)
@@ -87,7 +87,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(FunDecl funDecl){
         symbolTable.enterScope();
@@ -102,7 +102,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(FunDef funDef){
         symbolTable.enterScope();
@@ -118,7 +118,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(ParDecl parDecl){
         if(parDecl.type instanceof RecType){
@@ -133,7 +133,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(TypeDecl typeDecl){
         if(typeDecl.type instanceof RecType){
@@ -148,7 +148,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(TypeName typeName){
         try{
@@ -158,7 +158,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(VarDecl varDecl){
         if(varDecl.type instanceof RecType){
@@ -173,7 +173,7 @@ public class EvalDecl extends FullVisitor {
             ex.printStackTrace();
         }
     }
-    
+
     @Override
     public void visit(VarName varName){
         try{
@@ -197,6 +197,7 @@ public class EvalDecl extends FullVisitor {
 
     @Override
     public void visit(WhereExpr whereExpr){
+        iteration = 1;
         symbolTable.enterScope();
         for (int d = 0; d < whereExpr.numDecls(); d++)
             whereExpr.decl(d).accept(this);
