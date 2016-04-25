@@ -161,7 +161,7 @@ public class SynAn extends Phase {
         begLog("Program");
         Expr expr = parseExpression();
         endLog();
-        return new Program(new Position(tmp,laSymbol),expr);
+        return new Program(expr,expr);
     }
 
     private Expr parseExpression() throws IOException{
@@ -183,7 +183,7 @@ public class SynAn extends Phase {
                 }else{
                     nextSymbolIsError();
                 }
-                expr = new WhereExpr(new Position(tmp,laSymbol),expr,decls);
+                expr = new WhereExpr(new Position(expr,decls.getLast()),expr,decls);
                 expr = parseExpression_(expr);
                 break;
             case END:
@@ -224,14 +224,16 @@ public class SynAn extends Phase {
                     exprs.add(expr);
                 }
                 Symbol tmp = nextSymbol();
+                Expr exprL = expr;
                 expr = parseExpression();
                 exprs.add(expr);
-                Expr list = new Exprs(new Position(tmp,laSymbol),exprs);
+                Expr list = new Exprs(new Position(exprL,expr),exprs);
                 expr = parseExpressions_(list);
                 break;
             case CLOSING_PARENTHESIS:
                 break;
             default:
+                //System.err.println(laSymbol.token);
                 throw new InternalCompilerError();
         }
         endLog();
@@ -250,7 +252,7 @@ public class SynAn extends Phase {
             case ASSIGN:
                 Symbol tmp = nextSymbol();
                 Expr exprR = parseDisjunctiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.ASSIGN,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.ASSIGN,expr,exprR);
                 expr = parseAssignmentExpression_(expr);
                 break;
             case WHERE:
@@ -285,7 +287,7 @@ public class SynAn extends Phase {
             case OR:
                 Symbol tmp = nextSymbol();
                 Expr exprR = parseConjunctiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.OR,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.OR,expr,exprR);
                 expr = parseDisjunctiveExpression_(expr);
                 break;
             case WHERE:
@@ -321,7 +323,7 @@ public class SynAn extends Phase {
             case AND:
                 Symbol tmp = nextSymbol();
                 Expr exprR = parseRelationalExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.AND,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.AND,expr,exprR);
                 expr = parseConjunctiveExpression_(expr);
                 break;
             case WHERE:
@@ -360,37 +362,37 @@ public class SynAn extends Phase {
             case EQU:
                 tmp = nextSymbol();
                 exprR = parseAdditiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.EQU,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.EQU,expr,exprR);
                 expr = parseRelationalExpression_(expr);
                 break;
             case NEQ:
                 tmp = nextSymbol();
                 exprR = parseAdditiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.NEQ,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.NEQ,expr,exprR);
                 expr = parseRelationalExpression_(expr);
                 break;
             case LTH:
                 tmp = nextSymbol();
                 exprR = parseAdditiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.LTH,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.LTH,expr,exprR);
                 expr = parseRelationalExpression_(expr);
                 break;
             case GTH:
                 tmp = nextSymbol();
                 exprR = parseAdditiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.GTH,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.GTH,expr,exprR);
                 expr = parseRelationalExpression_(expr);
                 break;
             case LEQ:
                 tmp = nextSymbol();
                 exprR = parseAdditiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.LEQ,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.LEQ,expr,exprR);
                 expr = parseRelationalExpression_(expr);
                 break;
             case GEQ:
                 tmp = nextSymbol();
                 exprR = parseAdditiveExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.GEQ,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.GEQ,expr,exprR);
                 expr = parseRelationalExpression_(expr);
                 break;
             case WHERE:
@@ -430,13 +432,13 @@ public class SynAn extends Phase {
             case ADD:
                 tmp = nextSymbol();
                 exprR = parseMultiplicativeExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.ADD,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.ADD,expr,exprR);
                 expr = parseAdditiveExpression_(expr);
                 break;
             case SUB:
                 tmp = nextSymbol();
                 exprR = parseMultiplicativeExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.SUB,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.SUB,expr,exprR);
                 expr = parseAdditiveExpression_(expr);
                 break;
             case WHERE:
@@ -482,19 +484,19 @@ public class SynAn extends Phase {
             case MUL:
                 tmp = nextSymbol();
                 exprR = parsePrefixExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.MUL,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.MUL,expr,exprR);
                 expr = parseMultiplicativeExpression_(expr);
                 break;
             case DIV:
                 tmp = nextSymbol();
                 exprR = parsePrefixExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.DIV,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.DIV,expr,exprR);
                 expr = parseMultiplicativeExpression_(expr);
                 break;
             case MOD:
                 tmp = nextSymbol();
                 exprR = parsePrefixExpression();
-                expr = new BinExpr(new Position(tmp,laSymbol),BinExpr.Oper.MOD,expr,exprR);
+                expr = new BinExpr(new Position(expr,exprR),BinExpr.Oper.MOD,expr,exprR);
                 expr = parseMultiplicativeExpression_(expr);
                 break;
             case WHERE:
@@ -535,33 +537,34 @@ public class SynAn extends Phase {
             case ADD:
                 tmp = nextSymbol();
                 expr = parsePrefixExpression();
-                expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.ADD,expr);
+                expr = new UnExpr(new Position(tmp,expr),UnExpr.Oper.ADD,expr);
                 break;
             case SUB:
                 tmp = nextSymbol();
                 expr = parsePrefixExpression();
-                expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.SUB,expr);
+                expr = new UnExpr(new Position(tmp,expr),UnExpr.Oper.SUB,expr);
                 break;
             case NOT:
                 tmp = nextSymbol();
                 expr = parsePrefixExpression();
-                expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.NOT,expr);
+                expr = new UnExpr(new Position(tmp,expr),UnExpr.Oper.NOT,expr);
                 break;
             case MEM:
                 tmp = nextSymbol();
                 expr = parsePrefixExpression();
-                expr = new UnExpr(new Position(tmp,laSymbol),UnExpr.Oper.MEM,expr);
+                expr = new UnExpr(new Position(tmp,expr),UnExpr.Oper.MEM,expr);
                 break;
             case OPENING_BRACKET:
                 tmp = nextSymbol();
                 Type type = parseType();
+                Symbol tmpE;
                 if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
-                    nextSymbol();
+                    tmpE = nextSymbol();
                 }else{
-                    nextSymbolIsError();
+                    tmpE = nextSymbolIsError();
                 }
                 expr = parsePrefixExpression();
-                expr = new CastExpr(new Position(tmp,laSymbol),type,expr);
+                expr = new CastExpr(new Position(tmp,tmpE),type,expr);
                 break;
             case IDENTIFIER:
             case CONST_INTEGER:
@@ -597,12 +600,13 @@ public class SynAn extends Phase {
             case OPENING_BRACKET:
                 temp = nextSymbol();
                 exprR = parseExpression();
+                Symbol tempR;
                 if(laSymbol.token == Symbol.Token.CLOSING_BRACKET){
-                    nextSymbol();
+                    tempR = nextSymbol();
                 }else{
-                    nextSymbolIsError();
+                    tempR = nextSymbolIsError();
                 }
-                expr = new BinExpr(new Position(temp,laSymbol),BinExpr.Oper.ARR,expr,exprR);
+                expr = new BinExpr(new Position(expr,tempR),BinExpr.Oper.ARR,expr,exprR);
                 expr = parsePostfixExpression_(expr);
                 break;
             case DOT:
@@ -614,12 +618,12 @@ public class SynAn extends Phase {
                 }else{
                     nextSymbolIsError();
                 }
-                expr = new BinExpr(new Position(temp,laSymbol),BinExpr.Oper.REC,expr,new CompName(tmp,tmp.lexeme));
+                expr = new BinExpr(new Position(expr,tmp),BinExpr.Oper.REC,expr,new CompName(tmp,tmp.lexeme));
                 expr = parsePostfixExpression_(expr);
                 break;
             case VAL:
                 temp = nextSymbol();
-                expr = new UnExpr(new Position(temp,laSymbol),UnExpr.Oper.VAL,expr);
+                expr = new UnExpr(new Position(expr,temp),UnExpr.Oper.VAL,expr);
                 expr = parsePostfixExpression_(expr);
                 break;
             case WHERE:
@@ -659,6 +663,7 @@ public class SynAn extends Phase {
         begLog("AtomicExpression");
         Expr expr;
         Symbol sym;
+        Symbol tmp = null;
         switch(laSymbol.token){
             case CONST_INTEGER:
                 sym = nextSymbol();
@@ -687,6 +692,11 @@ public class SynAn extends Phase {
             case IDENTIFIER:
                 sym = nextSymbol();
                 expr = parseArgumentsOpt();
+                //if(laSymbol.token == Symbol.Token.CLOSING_PARENTHESIS){
+                    //tmp = nextSymbol();
+                //}else{
+                    //tmp = nextSymbolIsError();
+                //}
                 LinkedList<Expr> list = new LinkedList<Expr>();
                 if(expr!=null){
                     if(expr instanceof Exprs){
@@ -694,7 +704,7 @@ public class SynAn extends Phase {
                             list.add(((Exprs)expr).expr(i));
                         }
                     }else list.add(expr);
-                    expr = new FunCall(new Position(sym,laSymbol),sym.lexeme,list);
+                    expr = new FunCall(new Position(sym,expr),sym.lexeme,list);
                 }else expr = new VarName(sym,sym.lexeme);
                 break;
             case OPENING_PARENTHESIS:
@@ -722,11 +732,11 @@ public class SynAn extends Phase {
                 }
                 Expr elseExpr = parseExpression();
                 if(laSymbol.token == Symbol.Token.END){
-                    nextSymbol();
+                    tmp = nextSymbol();
                 }else{
-                    nextSymbolIsError();
+                    tmp = nextSymbolIsError();
                 }
-                expr = new IfExpr(new Position(sym,laSymbol),expr,thenExpr,elseExpr);
+                expr = new IfExpr(new Position(sym,tmp),expr,thenExpr,elseExpr);
                 break;
             case FOR:
                 sym = nextSymbol();
@@ -752,11 +762,11 @@ public class SynAn extends Phase {
                 }
                 Expr body = parseExpression();
                 if(laSymbol.token == Symbol.Token.END){
-                    nextSymbol();
+                    tmp = nextSymbol();
                 }else{
-                    nextSymbol();
+                    tmp = nextSymbolIsError();
                 }
-                expr = new ForExpr(new Position(sym,laSymbol),new VarName(sym,sym.lexeme),expr,hi,body);
+                expr = new ForExpr(new Position(sym,tmp),new VarName(sym,sym.lexeme),expr,hi,body);
                 break;
             case WHILE:
                 sym = nextSymbol();
@@ -768,11 +778,11 @@ public class SynAn extends Phase {
                 }
                 body = parseExpression();
                 if(laSymbol.token == Symbol.Token.END){
-                    nextSymbol();
+                    tmp = nextSymbol();
                 }else{
-                    nextSymbolIsError();
+                    tmp = nextSymbolIsError();
                 }
-                expr = new WhileExpr(new Position(sym,laSymbol),expr,body);
+                expr = new WhileExpr(new Position(sym,tmp),expr,body);
                 break;
             default:
                 throw new InternalCompilerError();
@@ -927,7 +937,7 @@ public class SynAn extends Phase {
                     nextSymbolIsError();
                 }
                 Type type = parseType();
-                decl = new TypeDecl(new Position(tmp,laSymbol),sym.lexeme,type);
+                decl = new TypeDecl(new Position(tmp,type),sym.lexeme,type);
                 break;
             default:
                 throw new InternalCompilerError();
@@ -966,8 +976,8 @@ public class SynAn extends Phase {
                 }
                 Type type = parseType();
                 Expr expr = parseFunctionBodyOpt();
-                if(expr==null) decl = new FunDecl(new Position(tmp,laSymbol),sym.lexeme,list,type);
-                else decl = new FunDef(new Position(tmp,laSymbol),sym.lexeme,list,type,expr);
+                if(expr==null) decl = new FunDecl(new Position(tmp,type),sym.lexeme,list,type);
+                else decl = new FunDef(new Position(tmp,expr),sym.lexeme,list,type,expr);
                 break;
             default:
                 throw new InternalCompilerError();
@@ -1029,7 +1039,7 @@ public class SynAn extends Phase {
                     nextSymbolIsError();
                 }
                 Type type = parseType();
-                param = new ParDecl(new Position(sym,laSymbol),sym.lexeme,type);
+                param = new ParDecl(new Position(sym,type),sym.lexeme,type);
                 break;
             default:
                 throw new InternalCompilerError();
@@ -1075,7 +1085,7 @@ public class SynAn extends Phase {
                     nextSymbolIsError();
                 }
                 Type type = parseType();
-                decl = new VarDecl(new Position(symVar,laSymbol),symId.lexeme,type);
+                decl = new VarDecl(new Position(symVar,type),symId.lexeme,type);
                 break;
             default:
                 throw new InternalCompilerError();
@@ -1127,10 +1137,11 @@ public class SynAn extends Phase {
                     nextSymbolIsError();
                 }
                 type = parseType();
-                type = new ArrType(new Position(sym,laSymbol),expr,type);
+                type = new ArrType(new Position(sym,type),expr,type);
                 break;
             case REC:
                 sym = nextSymbol();
+                Symbol tmp;
                 if(laSymbol.token == Symbol.Token.OPENING_BRACE){
                     nextSymbol();
                 }else{
@@ -1138,16 +1149,16 @@ public class SynAn extends Phase {
                 }
                 LinkedList<CompDecl> list = parseComponents();
                 if(laSymbol.token == Symbol.Token.CLOSING_BRACE){
-                    nextSymbol();
+                    tmp = nextSymbol();
                 }else{
-                    nextSymbolIsError();
+                    tmp = nextSymbolIsError();
                 }
-                type = new RecType(new Position(sym,laSymbol),list);
+                type = new RecType(new Position(sym,tmp),list);
                 break;
             case PTR:
                 sym = nextSymbol();
                 type = parseType();
-                type = new PtrType(new Position(sym,laSymbol),type);
+                type = new PtrType(new Position(sym,type),type);
                 break;
             default:
                 throw new InternalCompilerError();
@@ -1193,7 +1204,7 @@ public class SynAn extends Phase {
                     nextSymbolIsError();
                 }
                 Type type = parseType();
-                comp = new CompDecl(new Position(sym,laSymbol),sym.lexeme,type);
+                comp = new CompDecl(new Position(sym,type),sym.lexeme,type);
                 break;
             default:
                 throw new InternalCompilerError();
