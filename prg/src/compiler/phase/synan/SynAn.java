@@ -179,11 +179,11 @@ public class SynAn extends Phase {
                 Symbol tmp = nextSymbol();
                 LinkedList<Decl> decls = parseDeclarations();
                 if(laSymbol.token == Symbol.Token.END){
-                    nextSymbol();
+                    tmp = nextSymbol();
                 }else{
-                    nextSymbolIsError();
+                    tmp = nextSymbolIsError();
                 }
-                expr = new WhereExpr(new Position(expr,decls.getLast()),expr,decls);
+                expr = new WhereExpr(new Position(expr,tmp),expr,decls);
                 expr = parseExpression_(expr);
                 break;
             case END:
