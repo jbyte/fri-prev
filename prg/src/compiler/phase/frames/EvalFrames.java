@@ -18,28 +18,32 @@ public class EvalFrames extends FullVisitor {
 
     private final Attributes attrs;
     private int level;
+    private int numVar;
+    private int numFun;
 
     public EvalFrames(Attributes attrs) {
         this.attrs = attrs;
         this.level = 0;
+        this.numVar = 0;
+        this.numFun = 0;
     }
 
     @Override
     public void visit(FunDecl funDecl) {
-        level++;
-        long offset = 0;
+        //level++;
+        //long offset = 0;
         for (int p = 0; p < funDecl.numPars(); p++){
             funDecl.par(p).accept(this);
-            Typ typ = attrs.typAttr.get(funDecl.par(p));
-            attrs.accAttr.set(funDecl.par(p),new OffsetAccess(offset,typ.size()));
-            offset += typ.size();
+            //Typ typ = attrs.typAttr.get(funDecl.par(p));
+            //attrs.accAttr.set(funDecl.par(p),new OffsetAccess(offset,typ.size()));
+            //offset += typ.size();
         }
         funDecl.type.accept(this);
-        long inpCallSize = offset+8;
-        Typ typ = attrs.typAttr.get(funDecl.type);
-        inpCallSize += typ.size();
-        attrs.frmAttr.set(funDecl,new Frame(level,funDecl.name,inpCallSize,0,0,0,0));
-        level--;
+        //long inpCallSize = offset+8;
+        //Typ typ = attrs.typAttr.get(funDecl.type);
+        //inpCallSize += typ.size();
+        //attrs.frmAttr.set(funDecl,new Frame(level,funDecl.name,inpCallSize,0,0,0,0));
+        //level--;
     }
 
     @Override
@@ -57,7 +61,8 @@ public class EvalFrames extends FullVisitor {
         Typ typ = attrs.typAttr.get(funDef.type);
         inpCallSize += typ.size();
         funDef.body.accept(this);
-        attrs.frmAttr.set(funDef,new Frame(level,funDef.name,inpCallSize,0,0,0,0));
+        attrs.frmAttr.set(funDef,new Frame(level,"f"+numFun+"_"+funDef.name,inpCallSize,0,0,0,0));
+        numFun++;
         level--;
     }
 
@@ -76,7 +81,15 @@ public class EvalFrames extends FullVisitor {
     public void visit(VarDecl varDecl) {
         varDecl.type.accept(this);
         Typ typ = attrs.typAttr.get(varDecl);
-        attrs.accAttr.set(varDecl,new StaticAccess(varDecl.name,typ.size()));
+        attrs.accAttr.set(varDecl,new StaticAccess("v"+numVar+"_"+varDecl.name,typ.size()));
+        numVar++;
+    }
+
+    @Override
+    public void visit(WhereExpr whereExpr) {
+        whereExpr.expr.accept(this);
+        for (int d = 0; d < whereExpr.numDecls(); d++)
+            whereExpr.decl(d).accept(this);
     }
 
 }

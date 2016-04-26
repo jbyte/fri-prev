@@ -109,9 +109,11 @@ public class EvalDecl extends FullVisitor {
         for (int p = 0; p < funDef.numPars(); p++)
             funDef.par(p).accept(this);
         int tmp = iteration;
-        funDef.body.accept(this);
+        if(iteration==2)
+            funDef.body.accept(this);
         iteration = tmp;
-        symbolTable.leaveScope();
+        if(iteration==2)
+            symbolTable.leaveScope();
         funDef.type.accept(this);
         try{
             if(iteration==1)
@@ -179,15 +181,15 @@ public class EvalDecl extends FullVisitor {
     @Override
     public void visit(VarName varName){
         try{
-        	if(attrs.declAttr.get(varName)==null){
-	            Decl decl = symbolTable.fndDecl(varName.name());
-	            if(decl instanceof ParDecl && iteration==1){
-	                attrs.declAttr.set(varName,decl);
-	                tmp = true;
-	            }else if(iteration==2)
-	            	if(attrs.declAttr.get(varName)==null)
-	            		attrs.declAttr.set(varName,decl);
-        	}
+            if(attrs.declAttr.get(varName)==null){
+                Decl decl = symbolTable.fndDecl(varName.name());
+                if(decl instanceof ParDecl && iteration==1){
+                    attrs.declAttr.set(varName,decl);
+                    tmp = true;
+                }else if(iteration==2)
+                    if(attrs.declAttr.get(varName)==null)
+                        attrs.declAttr.set(varName,decl);
+            }
         }catch(CannotFndNameDecl ex){
             if(iteration==2 && !tmp)
                 ex.printStackTrace();
@@ -204,12 +206,12 @@ public class EvalDecl extends FullVisitor {
     public void visit(WhereExpr whereExpr){
         symbolTable.enterScope();
         for (int d = 0; d < whereExpr.numDecls(); d++){
-        	iteration = 1;
+            iteration = 1;
             whereExpr.decl(d).accept(this);
         }
         for (int d = 0; d < whereExpr.numDecls(); d++){
-        	iteration = 2;
-        	whereExpr.decl(d).accept(this);
+            iteration = 2;
+            whereExpr.decl(d).accept(this);
         }
         //iteration = 2;
         whereExpr.expr.accept(this);

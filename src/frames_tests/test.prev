@@ -7,9 +7,9 @@ where
       var r:rec { x:integer, y:integer, c:char }
       fun f2(j:integer,c:char,s:string):integer=i+j
         where
-		  var k:integer
-		  var a:arr[10]integer
-		end
+          var k:integer
+          var a:arr[10]integer
+        end
     end
   var banner:string
 end
