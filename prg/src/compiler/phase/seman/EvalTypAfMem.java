@@ -35,7 +35,8 @@ public class EvalTypAfMem extends FullVisitor{
             if(typ==null) break;
         }
         Typ tmp = attrs.typAttr.get(exprs);
-        if(typ!=null && tmp==null) attrs.typAttr.set(exprs,typ);
+        //if(typ!=null && tmp==null) attrs.typAttr.set(exprs,typ);
+        if(tmp==null) attrs.typAttr.set(exprs,typ);
     }
 
     @Override
@@ -52,6 +53,7 @@ public class EvalTypAfMem extends FullVisitor{
         whereExpr.expr.accept(this);
         Typ typ = attrs.typAttr.get(whereExpr);
         Typ tmp = attrs.typAttr.get(whereExpr.expr);
-        if(typ==null && tmp!=null) attrs.typAttr.set(whereExpr,tmp);
+        //if(typ==null && tmp!=null) attrs.typAttr.set(whereExpr,tmp);
+        if(typ==null) attrs.typAttr.set(whereExpr,tmp);
     }
 }

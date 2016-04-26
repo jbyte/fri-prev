@@ -24,6 +24,7 @@ public class EvalTyp extends FullVisitor {
     private final Attributes attrs;
 
     private int iteration;
+    private int tmp;
 
     public EvalTyp(Attributes attrs) {
         this.attrs = attrs;
@@ -134,7 +135,9 @@ public class EvalTyp extends FullVisitor {
 
     public void visit(CastExpr castExpr) {
         castExpr.type.accept(this);
+        tmp = iteration;
         castExpr.expr.accept(this);
+        iteration = tmp;
         Typ typTyp = attrs.typAttr.get(castExpr.type);
         Typ exprTyp = attrs.typAttr.get(castExpr.expr);
         if(typTyp instanceof PtrTyp && Typ.equiv(exprTyp,new PtrTyp(new VoidTyp())))
@@ -162,15 +165,18 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(Exprs exprs) {
-        for (int e = 0; e < exprs.numExprs(); e++)
+        for (int e = 0; e < exprs.numExprs(); e++){
+            tmp = iteration;
             exprs.expr(e).accept(this);
+            iteration = tmp;
+        }
         Typ typ = null;
         for(int e=0; e<exprs.numExprs(); e++){
             typ = attrs.typAttr.get(exprs.expr(e));
             if(typ==null)break;
         }
-        //if(typ!=null)attrs.typAttr.set(exprs,typ);
-        attrs.typAttr.set(exprs,typ);
+        if(typ!=null)attrs.typAttr.set(exprs,typ);
+        //attrs.typAttr.set(exprs,typ);
     }
 
     public void visit(ExprError exprError) {
@@ -180,7 +186,9 @@ public class EvalTyp extends FullVisitor {
         forExpr.var.accept(this);
         forExpr.loBound.accept(this);
         forExpr.hiBound.accept(this);
+        tmp = iteration;
         forExpr.body.accept(this);
+        iteration = tmp;
         Typ varTyp = attrs.typAttr.get(forExpr.var);
         Typ loTyp = attrs.typAttr.get(forExpr.loBound);
         Typ hiTyp = attrs.typAttr.get(forExpr.hiBound);
@@ -233,8 +241,11 @@ public class EvalTyp extends FullVisitor {
 
     public void visit(IfExpr ifExpr) {
         ifExpr.cond.accept(this);
+        tmp = iteration;
         ifExpr.thenExpr.accept(this);
+        iteration = tmp;
         ifExpr.elseExpr.accept(this);
+        iteration = tmp;
         Typ condTyp = attrs.typAttr.get(ifExpr.cond);
         Typ thenTyp = attrs.typAttr.get(ifExpr.thenExpr);
         Typ elseTyp = attrs.typAttr.get(ifExpr.elseExpr);
@@ -289,7 +300,9 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(UnExpr unExpr) {
+        tmp = iteration;
         unExpr.subExpr.accept(this);
+        iteration = tmp;
         Typ typ = attrs.typAttr.get(unExpr.subExpr);
         if(Typ.equiv(typ,new BooleanTyp()) && unExpr.oper==UnExpr.Oper.NOT)
             attrs.typAttr.set(unExpr,typ);
@@ -318,15 +331,18 @@ public class EvalTyp extends FullVisitor {
     }
 
     public void visit(WhereExpr whereExpr) {
-        iteration = 0;
-        for (int d = 0; d < whereExpr.numDecls(); d++)
+        for (int d = 0; d < whereExpr.numDecls(); d++){
+            iteration = 0;
             whereExpr.decl(d).accept(this);
-        iteration++;
-        for (int d = 0; d < whereExpr.numDecls(); d++)
+        }
+        for (int d = 0; d < whereExpr.numDecls(); d++){
+            iteration = 1;
             whereExpr.decl(d).accept(this);
-        iteration++;
-        for (int d = 0; d < whereExpr.numDecls(); d++)
+        }
+        for (int d = 0; d < whereExpr.numDecls(); d++){
+            iteration = 2;
             whereExpr.decl(d).accept(this);
+        }
         whereExpr.expr.accept(this);
         Typ decl = null;
         for(int d=0; d<whereExpr.numDecls(); d++){
@@ -334,13 +350,16 @@ public class EvalTyp extends FullVisitor {
             if(decl==null)break;
         }
         Typ typ = attrs.typAttr.get(whereExpr.expr);
-        //if(decl!=null && typ!=null) attrs.typAttr.set(whereExpr,typ);
-        if(decl!=null) attrs.typAttr.set(whereExpr,typ);
+        if(decl!=null && typ!=null) attrs.typAttr.set(whereExpr,typ);
+        //if(decl!=null) attrs.typAttr.set(whereExpr,typ);
+        iteration = 0;
     }
 
     public void visit(WhileExpr whileExpr) {
         whileExpr.cond.accept(this);
+        tmp = iteration;
         whileExpr.body.accept(this);
+        iteration = tmp;
         Typ condTyp = attrs.typAttr.get(whileExpr.cond);
         Typ bodyTyp = attrs.typAttr.get(whileExpr.body);
         if(Typ.equiv(condTyp,new BooleanTyp()) && bodyTyp!=null)
