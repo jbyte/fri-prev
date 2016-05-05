@@ -8,6 +8,7 @@ import compiler.phase.synan.*;
 import compiler.phase.abstr.*;
 import compiler.phase.seman.*;
 import compiler.phase.frames.*;
+import compiler.phase.imcode.*;
 
 /**
  * The compiler's entry point.
@@ -76,6 +77,13 @@ public class Main {
                 frames.close();
                 if (task.phase.equals("frames"))
                     break;
+
+ 				// Intermediate code generation.
+ 				Imcode imcode = new Imcode(task);
+ 				(new EvalImcode(task.prgAttrs, task.fragments)).visit(task.prgAST);
+ 				imcode.close();
+ 				if (task.phase.equals("imcode"))
+ 					break;
 
                 break;
             }

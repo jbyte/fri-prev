@@ -1,12 +1,15 @@
 package compiler;
 
+import java.util.*;
+
 import compiler.common.report.*;
 import compiler.data.ast.*;
 import compiler.data.ast.attr.*;
+import compiler.data.frg.*;
 
 /**
  * The parameters and internal data of the compilation process.
- * 
+ *
  * @author sliva
  */
 public class Task {
@@ -21,7 +24,7 @@ public class Task {
     public final String xslDName;
 
     /** A regular expression describing all phases of the compiler. */
-    private static final String allPhases = "(lexan|synan|abstr|seman|frames)";
+    private static final String allPhases = "(lexan|synan|abstr|seman|frames|imcode)";
 
     /** A list of phases logging should be performed for. */
     public final String loggedPhases;
@@ -31,7 +34,7 @@ public class Task {
 
     /**
      * Construct a new compilation task based on the command-line agruments.
-     * 
+     *
      * @param args
      *            Command-line arguments.
      */
@@ -109,10 +112,15 @@ public class Task {
      * The abstract syntax tree representing the program that is being compiled.
      */
     public Program prgAST = null;
- 
+
  	/**
  	 * The attributes of the AST nodes.
  	 */
     public Attributes prgAttrs = new Attributes();
+
+ 	/**
+ 	 * Fragments of the program (indexed by entry labels).
+ 	 */
+     public HashMap<String, Fragment> fragments = new HashMap<String, Fragment>();
 
 }
