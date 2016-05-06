@@ -18,6 +18,9 @@ hs_err_pid*
 # xml files
 *.xml
 
+# vim files (sesion)
+*.vim
+
 # vim swap files
 *.swp
 *.swo

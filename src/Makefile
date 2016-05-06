@@ -2,6 +2,9 @@
 # START GOOGLE CHROME WITH --allow-file-access-from-files
 #
 
+%.imcode.xml : %.prev
+	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=imcode --loggedphases=imcode $<
+
 %.frames.xml : %.prev
 	java -classpath ../prg/bin compiler.Main --xsldir=../prg/xsl --phase=frames --loggedphases=frames $<
 %.seman.xml : %.prev

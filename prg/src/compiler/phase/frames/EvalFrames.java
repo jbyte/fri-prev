@@ -64,7 +64,7 @@ public class EvalFrames extends FullVisitor {
         for (int p = 0; p < funDef.numPars(); p++){
             funDef.par(p).accept(this);
             Typ typ = attrs.typAttr.get(funDef.par(p));
-            attrs.accAttr.set(funDef.par(p),new OffsetAccess(offset,typ.size()));
+            attrs.accAttr.set(funDef.par(p),new OffsetAccess(level,offset,typ.size()));
             offset += typ.size();
             if(inFun!=null){
                 //Typ typ = attrs.typAttr.get(funCall.arg(a));
@@ -104,7 +104,7 @@ public class EvalFrames extends FullVisitor {
         for (int c = 0; c < recType.numComps(); c++){
             recType.comp(c).accept(this);
             Typ typ = attrs.typAttr.get(recType.comp(c));
-            attrs.accAttr.set(recType.comp(c),new OffsetAccess(offset,typ.size()));
+            attrs.accAttr.set(recType.comp(c),new OffsetAccess(level,offset,typ.size()));
             offset += typ.size();
         }
     }
@@ -118,7 +118,7 @@ public class EvalFrames extends FullVisitor {
         else{
             ArrayList<Long> list = map.get(inFun);
             list.set(0,list.get(0)+typ.size());
-            attrs.accAttr.set(varDecl,new OffsetAccess(-list.get(0),typ.size()));
+            attrs.accAttr.set(varDecl,new OffsetAccess(level,-list.get(0),typ.size()));
         }
         numVar++;
     }
