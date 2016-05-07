@@ -1,0 +1,6 @@
+for i=1,5:
+    i
+end
+where
+    var i:integer
+end

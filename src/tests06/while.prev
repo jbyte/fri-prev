@@ -1,0 +1,6 @@
+while a < 3 :
+    a
+end
+where
+    var a:integer
+end

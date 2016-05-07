@@ -1,0 +1,9 @@
+if a < 3 then
+    a
+else
+    b
+end
+where
+    var a:integer
+    var b:integer
+end
