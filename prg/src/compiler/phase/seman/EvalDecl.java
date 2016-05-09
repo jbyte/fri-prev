@@ -22,6 +22,7 @@ public class EvalDecl extends FullVisitor {
     private final Attributes attrs;
 
     private int iteration;
+    private int prevIter;
     private boolean tmp;
 
     public EvalDecl(Attributes attrs) {
@@ -204,6 +205,7 @@ public class EvalDecl extends FullVisitor {
 
     @Override
     public void visit(WhereExpr whereExpr){
+        prevIter = iteration;
         symbolTable.enterScope();
         for (int d = 0; d < whereExpr.numDecls(); d++){
             iteration = 1;
@@ -216,7 +218,7 @@ public class EvalDecl extends FullVisitor {
         //iteration = 2;
         whereExpr.expr.accept(this);
         symbolTable.leaveScope();
-        iteration = 1;
+        iteration = iteration;
     }
 }
 

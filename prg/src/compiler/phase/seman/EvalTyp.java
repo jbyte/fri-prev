@@ -319,7 +319,7 @@ public class EvalTyp extends FullVisitor {
         else if(Typ.equiv(typ,new IntegerTyp()) && (unExpr.oper==UnExpr.Oper.ADD ||
                     unExpr.oper==UnExpr.Oper.SUB))
             attrs.typAttr.set(unExpr,typ);
-        else if(typ instanceof PtrTyp)
+        else if(typ instanceof PtrTyp && unExpr.oper!=UnExpr.Oper.MEM)
             attrs.typAttr.set(unExpr,((PtrTyp)typ).baseTyp);
     }
 
