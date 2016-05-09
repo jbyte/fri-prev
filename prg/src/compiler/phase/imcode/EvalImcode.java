@@ -387,6 +387,14 @@ public class EvalImcode extends FullVisitor {
             case NOT:
                 attrs.imcAttr.set(unExpr, new UNOP(UNOP.Oper.NOT, subExpr));
                 break;
+            case VAL:
+                MEM tmp = (MEM)subExpr;
+                attrs.imcAttr.set(unExpr, tmp.addr);
+                break;
+            case MEM:
+                Typ typ = attrs.typAttr.get(unExpr);
+                attrs.imcAttr.set(unExpr, new MEM(subExpr,typ.size()));
+                break;
         }
     }
 
