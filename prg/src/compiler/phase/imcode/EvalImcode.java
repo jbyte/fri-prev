@@ -246,7 +246,12 @@ public class EvalImcode extends FullVisitor {
             widths.add(new Long(typ.size()));
         }
 
-        attrs.imcAttr.set(funCall,new CALL("_"+funCall.name(),args,widths));
+        Decl decl = attrs.declAttr.get(funCall);
+        if(decl instanceof FunDef){
+            Frame frame = attrs.frmAttr.get((FunDef)decl);
+            attrs.imcAttr.set(funCall,new CALL(frame.label,args,widths));
+        }else if(decl instanceof FunDecl)
+            attrs.imcAttr.set(funCall,new CALL("_"+funCall.name(),args,widths));
     }
 
     @Override
@@ -413,8 +418,9 @@ public class EvalImcode extends FullVisitor {
         else if(acc instanceof OffsetAccess)
             attrs.imcAttr.set(varName,new MEM(new BINOP(BINOP.Oper.ADD,new TEMP(TEMP.newTempName()),new CONST(((OffsetAccess)acc).offset)),typ.size()));
 
-        Fragment frag = new DataFragment(varName.name(),typ.size());
+        Fragment frag = new DataFragment("_"+varName.name(),typ.size());
         attrs.frgAttr.set(varName,frag);
+        fragments.put(frag.label, frag);
     }
 
     @Override

@@ -104,7 +104,7 @@ public class EvalFrames extends FullVisitor {
         for (int c = 0; c < recType.numComps(); c++){
             recType.comp(c).accept(this);
             Typ typ = attrs.typAttr.get(recType.comp(c));
-            attrs.accAttr.set(recType.comp(c),new OffsetAccess(level,offset,typ.size()));
+            attrs.accAttr.set(recType.comp(c),new OffsetAccess(-1,offset,typ.size()));
             offset += typ.size();
         }
     }
