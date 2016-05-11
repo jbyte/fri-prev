@@ -28,13 +28,13 @@ where
 	     for i=0,I-1:
 	       (check=check&((qs^)[i]!=j),
 	        check=check&((qs^)[i]-j!=i-I),
-		check=check&((qs^)[i]-j!=I-i),
+			check=check&((qs^)[i]-j!=I-i),
 	        none)
 	     end,
 	     if check then
 	       (
 	        (qs^)[I]=j,
-		solve(qs,I+1),
+			solve(qs,I+1),
 	        none
 	       )
 	     else

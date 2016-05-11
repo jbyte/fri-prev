@@ -42,7 +42,7 @@ public class LinCode extends Phase {
 
     // ----- INTERPRETER -----
 
-    private boolean debug = false;
+    private boolean debug = true;
 
     // STACK SEGMENT TOP: 0xF000000000000000l
     // HEAP SEGMENT BOT: 0x2000000000000000l
@@ -335,6 +335,7 @@ public class LinCode extends Phase {
     }
 
     private void stMem(long addr, long width, long value) {
+        if(addr<0) addr = registers[fp];
         if (debug)
             System.err.printf("[%1d] <- %1d\n", addr, value);
         for (int d = 0; d < width; d++) {
@@ -345,6 +346,7 @@ public class LinCode extends Phase {
     }
 
     private long ldMem(long addr, long width) {
+        if(addr<0) addr = registers[fp];
         long value = 0;
         for (int d = 0; d < width; d++) {
             Byte b = memory.get(addr + d);

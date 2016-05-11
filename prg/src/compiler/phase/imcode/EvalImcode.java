@@ -217,6 +217,7 @@ public class EvalImcode extends FullVisitor {
             body = (IMCStmt)tmp;
         else if(tmp instanceof IMCExpr)
             body = new ESTMT((IMCExpr)tmp);
+        MOVE inc = new MOVE(var,new BINOP(BINOP.Oper.ADD,var,new CONST(1)));
         JUMP jump = new JUMP(loop);
 
         Vector<IMCStmt> stmts = new Vector<IMCStmt>();
@@ -225,6 +226,7 @@ public class EvalImcode extends FullVisitor {
         stmts.add(cjump);
         stmts.add(lpos);
         stmts.add(body);
+        stmts.add(inc);
         stmts.add(jump);
         stmts.add(lneg);
 
@@ -280,8 +282,12 @@ public class EvalImcode extends FullVisitor {
         IMCExpr expr = null;
         if(tmp instanceof IMCExpr)
             expr = (IMCExpr)tmp;
-        else if(tmp instanceof IMCStmt)
-            expr = new SEXPR((IMCStmt)tmp,new NOP());
+        else if(tmp instanceof IMCStmt){
+            //expr = new SEXPR((IMCStmt)tmp,new NOP());
+            ESTMT ret = ((ESTMT)((STMTS)tmp).stmts(((STMTS)tmp).numStmts()-1));
+            expr = ret.expr;
+            expr = new SEXPR((IMCStmt)tmp,expr);
+        }
 
         MOVE move = new MOVE(new TEMP(RV), expr);
         Fragment fragment = new CodeFragment(tmpFragment.frame, tmpFragment.FP, tmpFragment.RV, move);
@@ -298,9 +304,11 @@ public class EvalImcode extends FullVisitor {
 
         String pos = LABEL.newLabelName();
         String neg = LABEL.newLabelName();
+        String end = LABEL.newLabelName();
 
         LABEL lpos = new LABEL(pos);
         LABEL lneg = new LABEL(neg);
+        LABEL lend = new LABEL(end);
 
         IMCExpr cond = (IMCExpr)attrs.imcAttr.get(ifExpr.cond);
         IMC tmpThen = attrs.imcAttr.get(ifExpr.thenExpr);
@@ -309,6 +317,7 @@ public class EvalImcode extends FullVisitor {
         CJUMP cjump = new CJUMP(cond,pos,neg);
         IMCStmt then = null;
         IMCStmt els = null;
+        JUMP jump = new JUMP(end);
 
         if(tmpThen instanceof IMCStmt)
             then = (IMCStmt)tmpThen;
@@ -324,8 +333,10 @@ public class EvalImcode extends FullVisitor {
         stmts.add(cjump);
         stmts.add(lpos);
         stmts.add(then);
+        stmts.add(jump);
         stmts.add(lneg);
         stmts.add(els);
+        stmts.add(lend);
 
         attrs.imcAttr.set(ifExpr,new STMTS(stmts));
     }
@@ -416,7 +427,7 @@ public class EvalImcode extends FullVisitor {
         if(acc instanceof StaticAccess)
             attrs.imcAttr.set(varName,new MEM(new NAME("_"+varName.name()),typ.size()));
         else if(acc instanceof OffsetAccess)
-            attrs.imcAttr.set(varName,new MEM(new BINOP(BINOP.Oper.ADD,new TEMP(TEMP.newTempName()),new CONST(((OffsetAccess)acc).offset)),typ.size()));
+            attrs.imcAttr.set(varName,new MEM(new BINOP(BINOP.Oper.ADD,new TEMP(TEMP.newTempName()),new CONST(-((OffsetAccess)acc).offset)),typ.size()));
 
         Fragment frag = new DataFragment("_"+varName.name(),typ.size());
         attrs.frgAttr.set(varName,frag);
