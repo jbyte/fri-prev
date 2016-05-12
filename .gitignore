@@ -32,3 +32,4 @@ hs_err_pid*
 
 # error files (for testing)
 *.err
+*.out

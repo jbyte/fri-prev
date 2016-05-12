@@ -54,8 +54,18 @@ public class EvalImcode extends FullVisitor {
                 attrs.imcAttr.set(atomExpr, new CONST(0));
             break;
         case CHAR:
-            if (atomExpr.value.charAt(1) == '\'')
-                attrs.imcAttr.set(atomExpr, new CONST(atomExpr.value.charAt(2)));
+            if (atomExpr.value.charAt(1) == '\\'){
+                char tmp = atomExpr.value.charAt(2);
+                switch(atomExpr.value.charAt(2)){
+            		case 'n':
+            			tmp = '\n';
+            			break;
+            		case 't':
+            			tmp = '\t';
+            			break;
+            	}
+                attrs.imcAttr.set(atomExpr, new CONST(tmp));
+            }
             else
                 attrs.imcAttr.set(atomExpr, new CONST(atomExpr.value.charAt(1)));
             break;
@@ -284,8 +294,15 @@ public class EvalImcode extends FullVisitor {
             expr = (IMCExpr)tmp;
         else if(tmp instanceof IMCStmt){
             //expr = new SEXPR((IMCStmt)tmp,new NOP());
-            ESTMT ret = ((ESTMT)((STMTS)tmp).stmts(((STMTS)tmp).numStmts()-1));
-            expr = ret.expr;
+            ESTMT ret = null;
+            int i = 1;
+            while(((STMTS)tmp).stmts(((STMTS)tmp).numStmts()-i) instanceof LABEL) i++;
+            if(((STMTS)tmp).stmts(((STMTS)tmp).numStmts()-i) instanceof STMTS)
+                expr = new NOP();
+            else{
+                ret = ((ESTMT)((STMTS)tmp).stmts(((STMTS)tmp).numStmts()-i));
+                expr = ret.expr;
+            }
             expr = new SEXPR((IMCStmt)tmp,expr);
         }
 
