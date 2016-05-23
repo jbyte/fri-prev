@@ -79,19 +79,25 @@ public class Main {
                 if (task.phase.equals("frames"))
                     break;
 
- 				// Intermediate code generation.
- 				Imcode imcode = new Imcode(task);
- 				(new EvalImcode(task.prgAttrs, task.fragments)).visit(task.prgAST);
- 				imcode.close();
- 				if (task.phase.equals("imcode"))
- 					break;
+                // Intermediate code generation.
+                Imcode imcode = new Imcode(task);
+                (new EvalImcode(task.prgAttrs, task.fragments)).visit(task.prgAST);
+                imcode.close();
+                if (task.phase.equals("imcode"))
+                    break;
 
- 				// Linearization of the intermediate code.
- 				LinCode linCode = new LinCode(task);
- 				//(new EvalLinCode(task.fragments)).visit(task.prgAST);
- 				linCode.close();
- 				if (task.phase.equals("lincode"))
- 					break;
+                // Linearization of the intermediate code.
+                LinCode linCode = new LinCode(task);
+                //(new EvalLinCode(task.fragments)).visit(task.prgAST);
+                linCode.close();
+                if (task.phase.equals("lincode"))
+                    break;
+
+                // MMIX instruction generation
+                CodeGen codeGen = new CodeGen(task);
+                codeGen.close();
+                if(task.phase.equals("codegen"))
+                    break;
 
                 break;
             }
