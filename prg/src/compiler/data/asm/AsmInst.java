@@ -3,8 +3,8 @@ package compiler.data.asm;
 import java.util.*;
 import java.util.regex.*;
 
-import compiler.data.imc;
-import compiler.data.frg;
+import compiler.data.imc.*;
+import compiler.data.frg.*;
 
 public abstract class AsmInst{
     public String mnemonic;
@@ -48,17 +48,19 @@ public abstract class AsmInst{
         String str = String.format("%-5s %s", mnemonic, assem);
         for(int i=0; i<uses.size(); i++){
             TEMP tmp = uses.get(i);
-            String reg = tmp.name();
+            //System.out.println(tmp);
+            String reg = "T"+tmp.name;
             str = str.replaceAll("`s"+i,Matcher.quoteReplacement(reg));
         }
         for(int i=0; i<defs.size(); i++){
             TEMP tmp = defs.get(i);
-            String reg = tmp.name();
+            //System.out.println(tmp);
+            String reg = "T"+tmp.name;
             str = str.replaceAll("`d"+i,Matcher.quoteReplacement(reg));
         }
         for(int i=0; i<labels.size(); i++){
             LABEL lab = labels.get(i);
-            str = str.replaceAll("`l"+i,lab.name());
+            str = str.replaceAll("`l"+i,lab.label);
         }
         return str;
     }

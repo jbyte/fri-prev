@@ -1,8 +1,11 @@
 package compiler.data.frg;
 
+import java.util.*;
+
 import compiler.common.logger.Logger;
 import compiler.data.frm.*;
 import compiler.data.imc.*;
+import compiler.data.asm.*;
 
 /**
  * A code fragment.
@@ -26,6 +29,9 @@ public class CodeFragment extends Fragment {
     /** The linearized intermediate code. */
     public final STMTS linCode;
 
+    /** The assembly instructions */
+    public LinkedList<AsmInst> asmcode;
+
     /**
      * Constucts a new code fragment.
      *
@@ -45,6 +51,7 @@ public class CodeFragment extends Fragment {
         this.RV = RV;
         this.stmt = stmt;
         this.linCode = (this.stmt == null) ? null : this.stmt.linCode();
+        this.asmcode = null;
     }
 
     @Override

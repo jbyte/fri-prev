@@ -29,7 +29,7 @@ public class SynAn extends Phase {
      *            The lexical analyzer.
      */
     public SynAn(Task task) {
-        super(task, "lincode");
+        super(task, "codegen");
         this.lexAn = new LexAn(task);
         this.logger.setTransformer(
                 new Transformer() {

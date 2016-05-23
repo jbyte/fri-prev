@@ -2,9 +2,9 @@ package compiler.data.asm;
 
 import java.util.*;
 
-import compiler.data.imc;
+import compiler.data.imc.*;
 
-public class AmsOPER extends AsmInst{
+public class AsmOPER extends AsmInst{
 
     public AsmOPER(String mnemonic,String assem,LinkedList<TEMP> defs,
             LinkedList<TEMP> uses, LinkedList<LABEL> labels){

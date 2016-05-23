@@ -1,6 +1,6 @@
 package compiler.data.asm;
 
-import compiler.data.imc;
+import compiler.data.imc.*;
 
 public class AsmLABEL extends AsmInst{
 

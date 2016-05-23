@@ -10,6 +10,7 @@ import compiler.phase.seman.*;
 import compiler.phase.lincode.*;
 import compiler.phase.frames.*;
 import compiler.phase.imcode.*;
+import compiler.phase.codegen.*;
 
 /**
  * The compiler's entry point.
@@ -95,6 +96,8 @@ public class Main {
 
                 // MMIX instruction generation
                 CodeGen codeGen = new CodeGen(task);
+                codeGen.generate();
+                codeGen.print();
                 codeGen.close();
                 if(task.phase.equals("codegen"))
                     break;
