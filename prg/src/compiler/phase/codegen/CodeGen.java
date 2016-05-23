@@ -196,7 +196,7 @@ public class CodeGen extends Phase{
 
             for(int i=call.numArgs()-1; i>=0; i--){
                 frag.asmcode.add(new AsmOPER("STO","`s0,`s1,"+(i*8),null,
-                            new LinkedList<TEMP>(Arrays.asList((TEMP)call.args(i),new TEMP(frag.FP)))));
+                            new LinkedList<TEMP>(Arrays.asList(parse(call.args(i)),new TEMP(frag.FP)))));
             }
 
             defs.add(tmp = new TEMP(TEMP.newTempName()));

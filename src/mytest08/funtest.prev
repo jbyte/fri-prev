@@ -1,0 +1,7 @@
+(
+i=0,
+i = foo(i,2)
+)where
+    var i:integer
+    fun foo(x:integer, y:integer):integer=x*y
+end
