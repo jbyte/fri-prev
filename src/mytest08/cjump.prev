@@ -1,0 +1,10 @@
+(
+i = 2,
+if i < 5 then
+    i = i + 1
+else
+    i = i - 1
+end
+)where
+    var i:integer
+end

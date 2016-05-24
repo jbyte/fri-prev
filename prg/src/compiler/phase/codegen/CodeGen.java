@@ -53,8 +53,8 @@ public class CodeGen extends Phase{
             }
         }else if(stm instanceof CJUMP){
             uses.add(parse(((CJUMP)stm).cond));
-            labels.add(new LABEL(((CJUMP)stm).posLabel));
-            frag.asmcode.add(new AsmOPER("BNZ","`s0,`l0",null,uses,labels));
+            labels.add(new LABEL(((CJUMP)stm).negLabel));
+            frag.asmcode.add(new AsmOPER("BZ","`s0,`l0",null,uses,labels));
         }else if(stm instanceof JUMP){
             labels.add(new LABEL(((JUMP)stm).label));
             frag.asmcode.add(new AsmOPER("JMP","`l0",null,null,labels));
@@ -306,7 +306,7 @@ public class CodeGen extends Phase{
                     succ.add(frag.asmcode.get(i+1));
                 }
 
-                if(inst.mnemonic.equals("BNZ") || inst.mnemonic.equals("JMP")){
+                if(inst.mnemonic.equals("BZ") || inst.mnemonic.equals("JMP")){
                     for(AsmInst label : frag.asmcode){
                         if(label instanceof AsmLABEL && ((AsmLABEL)label).labels.equals(inst.labels)){
                             succ.add(label);
