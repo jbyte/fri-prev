@@ -34,6 +34,7 @@ public class CodeGen extends Phase{
             }
         }
         optimize();
+        analyze();
     }
 
     private void parse(IMCStmt stm){
@@ -266,14 +267,130 @@ public class CodeGen extends Phase{
         }
     }
 
+    private void analyze(){
+        for(Fragment tmp : task.fragments.values()){
+            if(tmp instanceof CodeFragment){
+                analyze((CodeFragment)tmp);
+            }
+        }
+    }
+
+    private void analyze(CodeFragment frag){
+        LinkedHashMap<TEMP,InterferenceNode> graph = new LinkedHashMap<TEMP,InterferenceNode>();
+
+        for(AsmInst inst : frag.asmcode){
+            inst.in = new LinkedList<TEMP>();
+            inst.out = new LinkedList<TEMP>();
+        }
+
+        while(true){
+            int ok = 0;
+
+            for(int i=frag.asmcode.size()-1; i>=0; i--){
+                AsmInst inst = frag.asmcode.get(i);
+
+                LinkedList<TEMP> oldIn = new LinkedList<TEMP>(inst.in);
+                LinkedList<TEMP> oldOut = new LinkedList<TEMP>(inst.out);
+
+                inst.in = new LinkedList<TEMP>(inst.uses);
+
+                for(TEMP tmp : inst.out){
+                    if(tmp.name!=frag.FP && !inst.in.contains(tmp) && !inst.defs.contains(tmp)){
+                        inst.in.add(tmp);
+                    }
+                }
+
+                LinkedList<AsmInst> succ = new LinkedList<AsmInst>();
+
+                if(!inst.mnemonic.equals("JMP") && (i+1)<frag.asmcode.size()){
+                    succ.add(frag.asmcode.get(i+1));
+                }
+
+                if(inst.mnemonic.equals("BNZ") || inst.mnemonic.equals("JMP")){
+                    for(AsmInst label : frag.asmcode){
+                        if(label instanceof AsmLABEL && ((AsmLABEL)label).labels.equals(inst.labels)){
+                            succ.add(label);
+                            break;
+                        }
+                    }
+                }
+
+                inst.out = new LinkedList<TEMP>();
+
+                for(AsmInst succInst : succ){
+                    for(TEMP tmp : succInst.in){
+                        if(tmp.name!=frag.FP && !inst.out.contains(tmp)){
+                            inst.out.add(tmp);
+                        }
+                    }
+                }
+
+                if(inst.in.equals(oldIn) && inst.out.equals(oldOut)) ok++;
+            }
+
+            if(ok == frag.asmcode.size()) break;
+        }
+
+        for(AsmInst inst : frag.asmcode){
+            if(inst.defs.size()==0) continue;
+
+            TEMP tmp = inst.defs.getFirst();
+            InterferenceNode node = graph.get(tmp)==null ? new InterferenceNode(tmp) : graph.get(tmp);
+
+            for(TEMP out : inst.out){
+                if(!tmp.equals(out) && (!(inst instanceof AsmMOVE) ||
+                        inst instanceof AsmMOVE && !inst.uses.getFirst().equals(out))){
+                    boolean ok = true;
+
+                    for(InterferenceNode edge : node.edges){
+                        if(edge.tmp == out){
+                            ok = false;
+                            break;
+                        }
+                    }
+
+                    if(ok){
+                        InterferenceNode edge = graph.get(out)==null ? new InterferenceNode(out) : graph.get(out);
+                        edge.edges.add(node);
+                        graph.put(out,edge);
+
+                        node.edges.add(edge);
+                    }
+                }
+            }
+
+            graph.put(tmp,node);
+        }
+
+        frag.graph = new LinkedList<InterferenceNode>(graph.values());
+    }
+
     public void print(){
         for(Fragment tmp : task.fragments.values()){
             if(tmp instanceof CodeFragment){
                 CodeFragment frag = (CodeFragment)tmp;
+                System.out.println("Assembly for code fragment:");
 
                 for(AsmInst inst : frag.asmcode){
                     System.out.println(inst.format());
                 }
+
+                System.out.println("Interference graph for code fragment:");
+                printGraph(frag);
+            }
+        }
+    }
+
+    private void printGraph(CodeFragment frag){
+        for(InterferenceNode node : frag.graph){
+            if(node.edges.size()>0){
+                String output = "T" + node.tmp.name + ": ";
+
+                for(InterferenceNode edge : node.edges){
+                    output += "T" + edge.tmp.name + ", ";
+                }
+
+                System.out.println(output.substring(0,output.length()-2));
             }
         }
     }

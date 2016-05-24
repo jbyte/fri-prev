@@ -49,4 +49,9 @@ public class TEMP extends IMCExpr {
         return new SEXPR(new STMTS(new Vector<IMCStmt>()), new TEMP(name));
     }
 
+	@Override
+	public boolean equals(Object t){
+	    if(!(t instanceof TEMP)) return false;
+        else return this.name==((TEMP)t).name;
+	}
 }
