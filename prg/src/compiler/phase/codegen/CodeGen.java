@@ -33,6 +33,7 @@ public class CodeGen extends Phase{
                 }
             }
         }
+        optimize();
     }
 
     private void parse(IMCStmt stm){
@@ -206,6 +207,63 @@ public class CodeGen extends Phase{
 
         //if(tmp==null) System.out.println("null:"+tmp);
         return tmp;
+    }
+
+    private void optimize(){
+        for(Fragment tmp : task.fragments.values()){
+            if(tmp instanceof CodeFragment){
+                optimize((CodeFragment)tmp);
+            }
+        }
+    }
+
+    private void optimize(CodeFragment frag){
+        for(int i=0; i<frag.asmcode.size()-1; i++){
+            AsmInst inst = frag.asmcode.get(i);
+            if(inst.mnemonic.equals("SET") && inst.uses.size()==0){
+                TEMP def = inst.defs.getFirst();
+                String constant = inst.assem.substring(inst.assem.indexOf(',')+1);
+
+                boolean ok = false;
+
+                for(int j=0; j<frag.asmcode.size(); j++){
+                    AsmInst use = frag.asmcode.get(j);
+                    int idx = use.uses.indexOf(def);
+
+                    if(use.defs.contains(def) && i!=j) break;
+                    else if(idx==1 && (ok = use.uses.remove(def))){
+                        use.assem = use.assem.substring(0,use.assem.lastIndexOf(',')+1)+constant;
+                    }else if(use.mnemonic.equals("STO") && idx==0 && (ok = use.uses.remove(def))){
+                        use.mnemonic = "STCO";
+                        use.assem = constant+",`s0"+use.assem.substring(use.assem.lastIndexOf(','));
+                    }else if(use instanceof AsmMOVE && idx==0 && (ok = use.uses.remove(def))){
+                        frag.asmcode.remove(j);
+                        frag.asmcode.add(j,new AsmOPER("SET",use.assem.substring(0,use.assem.indexOf(',')+1)+
+                                    constant, use.defs, use.uses));
+                    }
+                }
+                if(ok) frag.asmcode.remove(i--);
+            }else if(inst instanceof AsmLABEL){
+                AsmInst next = frag.asmcode.get(i+1);
+                if(next instanceof AsmLABEL){
+                    for(int j=0; j<frag.asmcode.size(); j++){
+                        AsmInst tmp = frag.asmcode.get(j);
+                        if(tmp instanceof AsmOPER && tmp.labels.remove(next.labels.getFirst())){
+                            tmp.labels.add(inst.labels.getFirst());
+                        }
+                    }
+                    frag.asmcode.remove(i+1);
+                }
+            }else if(!inst.mnemonic.equals("PUSHJ")){
+                AsmInst use = frag.asmcode.get(i+1);
+
+                if(use instanceof AsmMOVE && use.uses.contains(inst.defs.getFirst())){
+                    inst.defs.set(0,use.defs.getFirst());
+                    frag.asmcode.remove(i+1);
+                    i--;
+                }
+            }
+        }
     }
 
     public void print(){

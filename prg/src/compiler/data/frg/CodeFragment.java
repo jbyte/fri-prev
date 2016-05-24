@@ -32,6 +32,9 @@ public class CodeFragment extends Fragment {
     /** The assembly instructions */
     public LinkedList<AsmInst> asmcode;
 
+    /** The interference graph */
+    public LinkedList<InterferenceNode> graph;
+
     /**
      * Constucts a new code fragment.
      *
@@ -52,6 +55,7 @@ public class CodeFragment extends Fragment {
         this.stmt = stmt;
         this.linCode = (this.stmt == null) ? null : this.stmt.linCode();
         this.asmcode = null;
+        this.graph = null;
     }
 
     @Override
