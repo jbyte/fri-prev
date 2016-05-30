@@ -24,13 +24,16 @@ public class Task {
     public final String xslDName;
 
     /** A regular expression describing all phases of the compiler. */
-    private static final String allPhases = "(lexan|synan|abstr|seman|frames|imcode|lincode|codegen)";
+    private static final String allPhases = "(lexan|synan|abstr|seman|frames|imcode|lincode|codegen|regalloc)";
 
     /** A list of phases logging should be performed for. */
     public final String loggedPhases;
 
     /** The last phase of the compiler to be performed. */
     public final String phase;
+
+    /** The number of registers */
+    public final int registers;
 
     /**
      * Construct a new compilation task based on the command-line agruments.
@@ -45,6 +48,7 @@ public class Task {
         String xslDName = "";
         String loggedPhases = "";
         String phase = "";
+        int reg = 0;
 
         for (int argc = 0; argc < args.length; argc++) {
             if (args[argc].startsWith("-")) {
@@ -86,6 +90,28 @@ public class Task {
                     continue;
                 }
 
+                if(args[argc].startsWith("--registers=")){
+                    if(reg==0){
+                        String num = args[argc].replaceFirst("--registers=","");
+                        if(num.equals("")){
+                            Report.warning("No number specified by '" + args[argc] + "'; option ignored");
+                            reg = 8;
+                        }else{
+                            try{
+                                reg = Integer.parseInt(num);
+                                if(reg<4 || reg>64){
+                                    Report.warning("Number has to be larger than 4 and smaller than 64");
+                                    reg = 8;
+                                }
+                            }catch(NumberFormatException ex){
+                                Report.warning("No number specified by '" + args[argc] + "'; option ignored");
+                                reg = 8;
+                            }
+                        }
+                    }else
+                        Report.warning("Number of registers already specified, option '" + args[argc] + "' ignored");
+                }
+
                 Report.warning("Unknown command line option '" + args[argc] + "'.");
             } else {
                 // This is a file name.
@@ -102,6 +128,7 @@ public class Task {
         this.xslDName = xslDName;
         this.loggedPhases = loggedPhases;
         this.phase = phase;
+        this.registers = reg;
 
         // Check the source file name.
         if (this.srcFName == "")

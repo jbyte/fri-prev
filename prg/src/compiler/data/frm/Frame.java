@@ -4,7 +4,7 @@ import compiler.common.logger.*;
 
 /**
  * A stack frame.
- * 
+ *
  * @author sliva
  */
 public class Frame implements Loggable {
@@ -38,7 +38,7 @@ public class Frame implements Loggable {
 	/**
 	 * The size of block containing temporary variables.
 	 */
-	public final long tmpVarsSize;
+	public long tmpVarsSize;
 
 	/**
 	 * The size of block containing hidden registers.
@@ -54,7 +54,7 @@ public class Frame implements Loggable {
 
 	/**
 	 * Constructs a new empty stack frame.
-	 * 
+	 *
 	 * @param level
 	 *            The static level.
 	 * @param label

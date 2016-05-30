@@ -11,6 +11,7 @@ import compiler.phase.lincode.*;
 import compiler.phase.frames.*;
 import compiler.phase.imcode.*;
 import compiler.phase.codegen.*;
+import compiler.phase.regalloc.*;
 
 /**
  * The compiler's entry point.
@@ -97,9 +98,19 @@ public class Main {
                 // MMIX instruction generation
                 CodeGen codeGen = new CodeGen(task);
                 codeGen.generate();
-                codeGen.print();
+                if(task.phase.equals("codegen"))
+                    codeGen.print();
                 codeGen.close();
                 if(task.phase.equals("codegen"))
+                    break;
+
+                // Register allocation
+                RegAlloc regAlloc = new RegAlloc(task);
+                regAlloc.allocate();
+                if(task.phase.equals("regalloc"))
+                    regAlloc.print();
+                regAlloc.close();
+                if(task.phase.equals("regalloc"))
                     break;
 
                 break;

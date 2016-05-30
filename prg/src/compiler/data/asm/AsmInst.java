@@ -44,18 +44,22 @@ public abstract class AsmInst{
         out = null;
     }
 
-    public String format(){
+    public String format(HashMap<TEMP,String> map){
         String str = String.format("%-5s %s", mnemonic, assem);
         for(int i=0; i<uses.size(); i++){
             TEMP tmp = uses.get(i);
-            //System.out.println(tmp);
-            String reg = "T"+tmp.name;
+            String reg = null;
+            if(map != null) reg = map.get(tmp);
+            else reg = "T"+tmp.name;
+            if(reg==null) reg = "T"+tmp.name;
             str = str.replaceAll("`s"+i,Matcher.quoteReplacement(reg));
         }
         for(int i=0; i<defs.size(); i++){
             TEMP tmp = defs.get(i);
-            //System.out.println(tmp);
-            String reg = "T"+tmp.name;
+            String reg = null;
+            if(map != null) reg = map.get(tmp);
+            else reg = "T"+tmp.name;
+            if(reg==null) reg = "T"+tmp.name;
             str = str.replaceAll("`d"+i,Matcher.quoteReplacement(reg));
         }
         for(int i=0; i<labels.size(); i++){

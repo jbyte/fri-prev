@@ -267,7 +267,7 @@ public class CodeGen extends Phase{
         }
     }
 
-    private void analyze(){
+    public void analyze(){
         for(Fragment tmp : task.fragments.values()){
             if(tmp instanceof CodeFragment){
                 analyze((CodeFragment)tmp);
@@ -275,7 +275,7 @@ public class CodeGen extends Phase{
         }
     }
 
-    private void analyze(CodeFragment frag){
+    public LinkedHashMap<TEMP, InterferenceNode> analyze(CodeFragment frag){
         LinkedHashMap<TEMP,InterferenceNode> graph = new LinkedHashMap<TEMP,InterferenceNode>();
 
         for(AsmInst inst : frag.asmcode){
@@ -363,6 +363,8 @@ public class CodeGen extends Phase{
         }
 
         frag.graph = new LinkedList<InterferenceNode>(graph.values());
+
+        return graph;
     }
 
     public void print(){
@@ -372,7 +374,7 @@ public class CodeGen extends Phase{
                 System.out.println("Assembly for code fragment:");
 
                 for(AsmInst inst : frag.asmcode){
-                    System.out.println(inst.format());
+                    System.out.println(inst.format(null));
                 }
 
                 System.out.println("Interference graph for code fragment:");

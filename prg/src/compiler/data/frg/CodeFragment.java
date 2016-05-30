@@ -35,6 +35,9 @@ public class CodeFragment extends Fragment {
     /** The interference graph */
     public LinkedList<InterferenceNode> graph;
 
+    /** The maping of the temporaries to registers */
+    public HashMap<TEMP, String> registers;
+
     /**
      * Constucts a new code fragment.
      *
@@ -56,6 +59,7 @@ public class CodeFragment extends Fragment {
         this.linCode = (this.stmt == null) ? null : this.stmt.linCode();
         this.asmcode = null;
         this.graph = null;
+        this.registers = null;
     }
 
     @Override
