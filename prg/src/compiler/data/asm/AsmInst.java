@@ -51,7 +51,15 @@ public abstract class AsmInst{
             String reg = null;
             if(map != null) reg = map.get(tmp);
             else reg = "T"+tmp.name;
-            if(reg==null) reg = "T"+tmp.name;
+            if(reg==null){
+                for(TEMP t : map.keySet()){
+                    if(t.equals(tmp)){
+                        reg = map.get(t);
+                        break;
+                    }
+                }
+                //reg = "T"+tmp.name;
+            }
             str = str.replaceAll("`s"+i,Matcher.quoteReplacement(reg));
         }
         for(int i=0; i<defs.size(); i++){
@@ -59,7 +67,15 @@ public abstract class AsmInst{
             String reg = null;
             if(map != null) reg = map.get(tmp);
             else reg = "T"+tmp.name;
-            if(reg==null) reg = "T"+tmp.name;
+            if(reg==null){
+                for(TEMP t : map.keySet()){
+                    if(t.equals(tmp)){
+                        reg = map.get(t);
+                        break;
+                    }
+                }
+                //reg = "T"+tmp.name;
+            }
             str = str.replaceAll("`d"+i,Matcher.quoteReplacement(reg));
         }
         for(int i=0; i<labels.size(); i++){
