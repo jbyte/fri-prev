@@ -128,7 +128,7 @@ public class Task {
         this.xslDName = xslDName;
         this.loggedPhases = loggedPhases;
         this.phase = phase;
-        this.registers = reg;
+        this.registers = (reg==0 ? 8 : reg);
 
         // Check the source file name.
         if (this.srcFName == "")

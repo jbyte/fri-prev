@@ -46,6 +46,7 @@ public class RegAlloc extends Phase{
                 frag.registers = new HashMap<TEMP,String>();
                 frag.registers.put(new TEMP(frag.FP),"$65");
 
+                if(frag.graph.isEmpty())System.out.println("empty");
                 for(InterferenceNode node : frag.graph){
                     frag.registers.put(node.tmp,"$"+node.reg);
                 }
@@ -99,8 +100,8 @@ public class RegAlloc extends Phase{
                     for(InterferenceNode edge : frag.graph){
                         edge.edges.remove(node);
                     }
+                    iter.remove();
                 }
-                iter.remove();
             }
         }
     }
