@@ -113,6 +113,14 @@ public class Main {
                 if(task.phase.equals("regalloc"))
                     break;
 
+                Build build = new Build(task);
+                build.build();
+                if(task.phase.equals("regalloc"))
+                    build.writeToFile();
+                build.close();
+                if(task.phase.equals("regalloc"))
+                    break;
+
                 break;
             }
         } catch (CompilerError errorReport) {

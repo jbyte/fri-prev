@@ -57,13 +57,13 @@ public class EvalImcode extends FullVisitor {
             if (atomExpr.value.charAt(1) == '\\'){
                 char tmp = atomExpr.value.charAt(2);
                 switch(atomExpr.value.charAt(2)){
-            		case 'n':
-            			tmp = '\n';
-            			break;
-            		case 't':
-            			tmp = '\t';
-            			break;
-            	}
+                    case 'n':
+                        tmp = '\n';
+                        break;
+                    case 't':
+                        tmp = '\t';
+                        break;
+                }
                 attrs.imcAttr.set(atomExpr, new CONST(tmp));
             }
             else
@@ -277,8 +277,9 @@ public class EvalImcode extends FullVisitor {
     public void visit(FunDef funDef) {
         Frame frame = attrs.frmAttr.get(funDef);
         int FP = TEMP.newTempName();
+        int SP = TEMP.newTempName();
         int RV = TEMP.newTempName();
-        CodeFragment tmpFragment = new CodeFragment(frame, FP, RV, null);
+        CodeFragment tmpFragment = new CodeFragment(frame, FP, SP, RV, null);
         codeFragments.push(tmpFragment);
 
         for (int p = 0; p < funDef.numPars(); p++)
@@ -307,7 +308,7 @@ public class EvalImcode extends FullVisitor {
         }
 
         MOVE move = new MOVE(new TEMP(RV), expr);
-        Fragment fragment = new CodeFragment(tmpFragment.frame, tmpFragment.FP, tmpFragment.RV, move);
+        Fragment fragment = new CodeFragment(tmpFragment.frame, tmpFragment.FP, tmpFragment.SP, tmpFragment.RV, move);
         attrs.frgAttr.set(funDef, fragment);
         attrs.imcAttr.set(funDef, move);
         fragments.put(fragment.label, fragment);

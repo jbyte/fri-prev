@@ -20,6 +20,9 @@ public class CodeFragment extends Fragment {
     /** A temporary register used as the frame pointer. */
     public final int FP;
 
+    /** A temporary register used as the stack pointer. */
+    public final int SP;
+
     /** A temporary register used for returning the function's result. */
     public final int RV;
 
@@ -50,10 +53,11 @@ public class CodeFragment extends Fragment {
      * @param stmt
      *            The intermediate code.
      */
-    public CodeFragment(Frame frame, int FP, int RV, IMCStmt stmt) {
+    public CodeFragment(Frame frame, int FP, int SP, int RV, IMCStmt stmt) {
         super(frame.label);
         this.frame = frame;
         this.FP = FP;
+        this.SP = SP;
         this.RV = RV;
         this.stmt = stmt;
         this.linCode = (this.stmt == null) ? null : this.stmt.linCode();
@@ -66,7 +70,7 @@ public class CodeFragment extends Fragment {
     public void toXML(Logger logger) {
         logger.begElement("frg");
         logger.addAttribute("kind", "CODE FRAGMENT " + "(" + label + "," + "FP=" + FP + "," + "RV=" + RV  + ")");
- 		if (linCode != null) linCode.toXML(logger);
+        if (linCode != null) linCode.toXML(logger);
         logger.endElement();
     }
 

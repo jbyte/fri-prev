@@ -44,7 +44,8 @@ public class RegAlloc extends Phase{
                 }while(select(frag));
 
                 frag.registers = new HashMap<TEMP,String>();
-                frag.registers.put(new TEMP(frag.FP),"$65");
+                frag.registers.put(new TEMP(frag.SP),"$254");
+                frag.registers.put(new TEMP(frag.FP),"$253");
 
                 if(frag.graph.isEmpty())System.out.println("empty");
                 for(InterferenceNode node : frag.graph){
@@ -192,11 +193,11 @@ public class RegAlloc extends Phase{
             int def = 0;
             while(!frag.asmcode.get(def++).defs.contains(node.tmp)){}
 
-            frag.asmcode.add(def,new AsmOPER("STO","`s0,`s1,"+offset,null,new LinkedList<TEMP>(Arrays.asList(node.tmp,new TEMP(frag.FP)))));
+            frag.asmcode.add(def,new AsmOPER("STO","`s0,`s1,"+offset,null,new LinkedList<TEMP>(Arrays.asList(node.tmp,new TEMP(frag.SP)))));
 
             for(int i=frag.asmcode.size()-1; i>def; i--){
                 if(frag.asmcode.get(i).uses.contains(node.tmp)){
-                    frag.asmcode.add(i,new AsmOPER("LDO","`d0,`s0,"+offset,new LinkedList<TEMP>(Arrays.asList(node.tmp)),new LinkedList<TEMP>(Arrays.asList(new TEMP(frag.FP)))));
+                    frag.asmcode.add(i,new AsmOPER("LDO","`d0,`s0,"+offset,new LinkedList<TEMP>(Arrays.asList(node.tmp)),new LinkedList<TEMP>(Arrays.asList(new TEMP(frag.SP)))));
                 }
             }
         }

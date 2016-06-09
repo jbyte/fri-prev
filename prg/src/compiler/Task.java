@@ -24,7 +24,7 @@ public class Task {
     public final String xslDName;
 
     /** A regular expression describing all phases of the compiler. */
-    private static final String allPhases = "(lexan|synan|abstr|seman|frames|imcode|lincode|codegen|regalloc)";
+    private static final String allPhases = "(lexan|synan|abstr|seman|frames|imcode|lincode|codegen|regalloc|build)";
 
     /** A list of phases logging should be performed for. */
     public final String loggedPhases;
@@ -140,14 +140,14 @@ public class Task {
      */
     public Program prgAST = null;
 
- 	/**
- 	 * The attributes of the AST nodes.
- 	 */
+    /**
+     * The attributes of the AST nodes.
+     */
     public Attributes prgAttrs = new Attributes();
 
- 	/**
- 	 * Fragments of the program (indexed by entry labels).
- 	 */
+    /**
+     * Fragments of the program (indexed by entry labels).
+     */
      public HashMap<String, Fragment> fragments = new HashMap<String, Fragment>();
 
 }
