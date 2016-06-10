@@ -377,7 +377,7 @@ public class EvalImcode extends FullVisitor {
         else if(prog instanceof IMCExpr)
             tmp = new ESTMT((IMCExpr)prog);
 
-        Fragment frag = new CodeFragment(fr,0,0,tmp);
+        Fragment frag = new CodeFragment(fr,0,0,0,tmp);
         attrs.frgAttr.set(program,frag);
 
         fragments.put(frag.label, frag);

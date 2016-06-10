@@ -12,6 +12,7 @@ import compiler.phase.frames.*;
 import compiler.phase.imcode.*;
 import compiler.phase.codegen.*;
 import compiler.phase.regalloc.*;
+import compiler.phase.build.*;
 
 /**
  * The compiler's entry point.

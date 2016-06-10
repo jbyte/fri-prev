@@ -48,6 +48,8 @@ public class CodeFragment extends Fragment {
      *            The function's stack frame.
      * @param FP
      *            A temporary register used as the frame pointer.
+     * @param SP
+     *            A temporary register used as the stack pointer.
      * @param RV
      *            A temporary register used for returning the function's result.
      * @param stmt
