@@ -116,10 +116,10 @@ public class Main {
 
                 Build build = new Build(task);
                 build.build();
-                if(task.phase.equals("regalloc"))
+                if(task.phase.equals("build"))
                     build.writeToFile();
                 build.close();
-                if(task.phase.equals("regalloc"))
+                if(task.phase.equals("build"))
                     break;
 
                 break;

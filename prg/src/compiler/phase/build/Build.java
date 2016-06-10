@@ -12,6 +12,7 @@ import compiler.phase.codegen.*;
 
 import compiler.data.asm.*;
 import compiler.data.frg.*;
+import compiler.data.frm.*;
 import compiler.data.imc.*;
 
 public class Build extends Phase{
@@ -57,7 +58,8 @@ public class Build extends Phase{
             }
         }
 
-        CodeFragment main = new CodeFragment(null,0,0,0,null);
+        Frame fr = new Frame(0,"",0,0,0,0,0);
+        CodeFragment main = new CodeFragment(fr,0,0,0,null);
         main.asmcode = new LinkedList<AsmInst>();
 
         main.asmcode.add(new AsmOPER("LOC", "#100"));
@@ -71,6 +73,8 @@ public class Build extends Phase{
         main.asmcode.add(new AsmOPER("SL", "$255,$255,60"));
         main.asmcode.add(new AsmOPER("PUSHJ", "$0,_"));
         main.asmcode.add(new AsmOPER("TRAP", "0,Halt,0"));
+
+        task.fragments.put("",main);
     }
 
     public void writeToFile(){
@@ -121,11 +125,11 @@ public class Build extends Phase{
                         String data = "";
                         for(long j=0; j<(frag.width/8)-1; j++) data += "0,";
 
-                        pw.write(String.format("%-"+labelLen+"s ",frag.label+"OCTA "+data+"0\n"));
+                        pw.write(String.format("%-"+labelLen+"s %s",frag.label,"OCTA "+data+"0\n"));
                     }else if(tmp instanceof ConstFragment){
                         ConstFragment frag = (ConstFragment)tmp;
 
-                        pw.write(String.format("%-"+labelLen+"s ",frag.label+"BYTE \""+frag.string+"\"0\n"));
+                        pw.write(String.format("%-"+labelLen+"s %s",frag.label,"BYTE \""+frag.string+"\"0\n"));
                     }
                 }
                 pw.write("\n");
@@ -142,15 +146,18 @@ public class Build extends Phase{
                                 frag.asmcode.add(new AsmOPER("SWYM",""));
                             }
 
-                            pw.write(String.format("%-"+labelLen+"s %s", inst.labels.getFirst().label,
-                                        frag.asmcode.get(++j).format(frag.registers)+"\n"));
+                            pw.write(String.format("%-"+labelLen+"s %s\n", inst.labels.getFirst().label,
+                                        frag.asmcode.get(++j).format(frag.registers)));
                         }else{
                             indent(labelLen+1,pw);
-                            pw.write(inst.format(frag.registers));
+                            pw.write(inst.format(frag.registers)+"\n");
                         }
                     }
+                    pw.write("\n");
                 }
             }
+            pw.flush();
+            pw.close();
         }catch(IOException ex){
             ex.printStackTrace();
         }
